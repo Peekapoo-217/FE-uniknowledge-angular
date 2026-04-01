@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TagDetail, TagFilterDto, FilteredQuestionsResponse, CreateTagRequest, UpdateTagRequest } from '../models/tag.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TagService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5134/api/tags';
+  private apiUrl = `${environment.apiUrl}/tags`;
 
   getTags(search?: string): Observable<TagDetail[]> {
     let params = new HttpParams();

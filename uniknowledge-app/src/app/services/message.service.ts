@@ -2,24 +2,26 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Message, Conversation } from '../models/message.model';
+import { CursorPagedResult } from '../models/cursor-pagination.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5134/api/messages';
+  private apiUrl = `${environment.apiUrl}/messages`;
 
-  getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}/conversations`);
+  getConversations(limit: number = 20, after?: string): Observable<CursorPagedResult<Conversation>> {
+    let params = new HttpParams().set('limit', limit.toString());
+    if (after) params = params.set('after', after);
+    return this.http.get<CursorPagedResult<Conversation>>(`${this.apiUrl}/conversations`, { params });
   }
 
-  getConversation(otherUserId: number, page: number = 1, pageSize: number = 50): Observable<Message[]> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
-
-    return this.http.get<Message[]>(`${this.apiUrl}/conversation/${otherUserId}`, { params });
+  getConversation(otherUserId: number, limit: number = 50, after?: string): Observable<CursorPagedResult<Message>> {
+    let params = new HttpParams().set('limit', limit.toString());
+    if (after) params = params.set('after', after);
+    return this.http.get<CursorPagedResult<Message>>(`${this.apiUrl}/conversation/${otherUserId}`, { params });
   }
 
   getUnreadCount(): Observable<{ unreadCount: number }> {
@@ -37,4 +39,3 @@ export class MessageService {
     });
   }
 }
-

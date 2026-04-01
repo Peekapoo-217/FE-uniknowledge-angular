@@ -18,15 +18,15 @@ export interface UpdateTagRequest {
 export interface TagFilterDto {
   tagIds?: number[];
   logic?: 'AND' | 'OR';
-  page?: number;
-  pageSize?: number;
+  limit?: number;
+  after?: string;
 }
 
 export interface FilteredQuestionsResponse {
-  questions: any[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+  items: any[];
+  pageInfo: {
+    hasNextPage: boolean;
+    endCursor?: string;
+  };
 }
 

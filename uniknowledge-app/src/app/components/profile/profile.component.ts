@@ -51,8 +51,8 @@ export class ProfileComponent implements OnInit {
   loadMyQuestions(): void {
     this.isLoadingQuestions.set(true);
     this.userProfileService.getMyQuestions().subscribe({
-      next: (questions) => {
-        this.questions.set(questions);
+      next: (result) => {
+        this.questions.set(result.items);
         this.isLoadingQuestions.set(false);
       },
       error: () => {

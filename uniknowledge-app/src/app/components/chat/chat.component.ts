@@ -50,8 +50,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   private typingDebounceTimeout?: number;
   private searchDebounceTimeout?: number;
   private shouldScrollToBottom = false;
-  private currentPage = 1;
-  private readonly pageSize = 50;
+  private messagesEndCursor?: string;
+  private messagesHasNextPage = false;
+  private readonly messageLimit = 50;
 
   constructor() {
     effect(() => {
@@ -150,8 +151,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loadConversations(): void {
     this.isLoading.set(true);
     this.messageService.getConversations().subscribe({
-      next: (conversations) => {
-        this.conversations.set(conversations);
+      next: (result) => {
+        this.conversations.set(result.items);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -164,7 +165,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   async selectConversation(userId: number): Promise<void> {
     this.selectedUserId.set(userId);
     this.messages.set([]);
-    this.currentPage = 1;
+    this.messagesEndCursor = undefined;
+    this.messagesHasNextPage = false;
     this.typingUsers.set(new Set());
     this.router.navigate(['/chat', userId]);
     await this.loadMessages();
@@ -177,15 +179,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     this.isLoading.set(true);
     return new Promise((resolve, reject) => {
-      this.messageService.getConversation(userId, this.currentPage, this.pageSize).subscribe({
-        next: (messages) => {
-          if (this.currentPage === 1) {
-            this.messages.set(messages);
-          } else {
-            this.messages.set([...messages, ...this.messages()]);
-          }
+      this.messageService.getConversation(userId, this.messageLimit).subscribe({
+        next: (result) => {
+          this.messages.set(result.items);
+          this.messagesEndCursor = result.pageInfo.endCursor ?? undefined;
+          this.messagesHasNextPage = result.pageInfo.hasNextPage;
           this.isLoading.set(false);
-          this.shouldScrollToBottom = this.currentPage === 1;
+          this.shouldScrollToBottom = true;
           resolve();
         },
         error: (error) => {
@@ -198,12 +198,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   loadMoreMessages(): void {
-    if (this.isLoadingMore()) return;
+    if (this.isLoadingMore() || !this.messagesHasNextPage) return;
+    const userId = this.selectedUserId();
+    if (!userId) return;
 
-    this.currentPage++;
     this.isLoadingMore.set(true);
-    this.loadMessages().finally(() => {
-      this.isLoadingMore.set(false);
+    this.messageService.getConversation(userId, this.messageLimit, this.messagesEndCursor).subscribe({
+      next: (result) => {
+        this.messages.update(current => [...result.items, ...current]);
+        this.messagesEndCursor = result.pageInfo.endCursor ?? undefined;
+        this.messagesHasNextPage = result.pageInfo.hasNextPage;
+        this.isLoadingMore.set(false);
+      },
+      error: () => {
+        this.isLoadingMore.set(false);
+      }
     });
   }
 
@@ -518,22 +527,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       return;
     }
 
-    console.log('Searching for:', term);
     this.isSearching.set(true);
     this.userProfileService.searchUsers(term, 10).subscribe({
       next: (users) => {
-        console.log('Search results received:', users);
-        console.log('Number of results:', users.length);
         this.searchResults.set(users);
         this.isSearching.set(false);
       },
-      error: (error) => {
-        console.error('Error searching users:', error);
-        console.error('Error status:', error.status);
-        console.error('Error message:', error.message);
-        if (error.error) {
-          console.error('Error details:', error.error);
-        }
+      error: () => {
         this.isSearching.set(false);
         this.searchResults.set([]);
       }

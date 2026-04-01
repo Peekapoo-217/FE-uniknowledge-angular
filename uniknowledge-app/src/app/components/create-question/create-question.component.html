@@ -4,15 +4,15 @@
       <h1 class="text-3xl font-bold text-gray-900 mb-6">Ask a Question</h1>
 
       @if (errorMessage()) {
-        <div class="rounded-md bg-red-50 p-4 mb-6">
-          <div class="flex">
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">
-                {{ errorMessage() }}
-              </h3>
-            </div>
+      <div class="rounded-md bg-red-50 p-4 mb-6">
+        <div class="flex">
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">
+              {{ errorMessage() }}
+            </h3>
           </div>
         </div>
+      </div>
       }
 
       <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
@@ -21,25 +21,21 @@
           <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
             Question Title
           </label>
-          <input
-            id="title"
-            type="text"
-            formControlName="title"
+          <input id="title" type="text" formControlName="title"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="e.g. How to implement authentication in Angular?"
-          />
+            placeholder="e.g. How to implement authentication in Angular?" />
           @if (title?.invalid && title?.touched) {
-            <div class="text-red-600 text-sm mt-1">
-              @if (title?.errors?.['required']) {
-                Title is required
-              }
-              @if (title?.errors?.['minlength']) {
-                Title must be at least 10 characters
-              }
-              @if (title?.errors?.['maxlength']) {
-                Title must not exceed 255 characters
-              }
-            </div>
+          <div class="text-red-600 text-sm mt-1">
+            @if (title?.errors?.['required']) {
+            Title is required
+            }
+            @if (title?.errors?.['minlength']) {
+            Title must be at least 10 characters
+            }
+            @if (title?.errors?.['maxlength']) {
+            Title must not exceed 255 characters
+            }
+          </div>
           }
         </div>
 
@@ -48,22 +44,18 @@
           <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
             Question Details
           </label>
-          <textarea
-            id="content"
-            formControlName="content"
-            rows="10"
+          <textarea id="content" formControlName="content" rows="10"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="Describe your question in detail..."
-          ></textarea>
+            placeholder="Describe your question in detail..."></textarea>
           @if (content?.invalid && content?.touched) {
-            <div class="text-red-600 text-sm mt-1">
-              @if (content?.errors?.['required']) {
-                Content is required
-              }
-              @if (content?.errors?.['minlength']) {
-                Content must be at least 20 characters
-              }
-            </div>
+          <div class="text-red-600 text-sm mt-1">
+            @if (content?.errors?.['required']) {
+            Content is required
+            }
+            @if (content?.errors?.['minlength']) {
+            Content must be at least 20 characters
+            }
+          </div>
           }
         </div>
 
@@ -72,24 +64,21 @@
           <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
             Category
           </label>
-          <select
-            id="categoryId"
-            formControlName="categoryId"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
+          <select id="categoryId" formControlName="categoryId"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="">Select a category</option>
             @for (category of categories(); track category.categoryId) {
-              <option [value]="category.categoryId">
-                {{ category.categoryName }}
-              </option>
+            <option [value]="category.categoryId">
+              {{ category.categoryName }}
+            </option>
             }
           </select>
           @if (categoryId?.invalid && categoryId?.touched) {
-            <div class="text-red-600 text-sm mt-1">
-              @if (categoryId?.errors?.['required']) {
-                Category is required
-              }
-            </div>
+          <div class="text-red-600 text-sm mt-1">
+            @if (categoryId?.errors?.['required']) {
+            Category is required
+            }
+          </div>
           }
         </div>
 
@@ -98,89 +87,70 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Tags (select at least one)
           </label>
-          
+
           <!-- Search input -->
           <div class="mb-3">
-            <input
-              type="text"
-              [(ngModel)]="tagSearchQuery"
-              (input)="searchTags()"
-              [ngModelOptions]="{standalone: true}"
+            <input type="text" [(ngModel)]="tagSearchQuery" (input)="searchTags()" [ngModelOptions]="{standalone: true}"
               placeholder="Search tags... (type at least 2 characters)"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
-          
+
           <!-- Selected tags -->
           @if (selectedTags().length > 0) {
-            <div class="mb-3">
-              <p class="text-xs text-gray-500 mb-2">Selected tags:</p>
-              <div class="flex flex-wrap gap-2">
-                @for (tagId of selectedTags(); track tagId) {
-                  @for (tag of tags(); track tag.tagId) {
-                    @if (tag.tagId === tagId) {
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-600 text-white">
-                        {{ tag.tagName }}
-                        <button
-                          type="button"
-                          (click)="toggleTag(tagId)"
-                          class="ml-2 hover:text-gray-200"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    }
-                  }
-                }
-              </div>
+          <div class="mb-3">
+            <p class="text-xs text-gray-500 mb-2">Selected tags:</p>
+            <div class="flex flex-wrap gap-2">
+              @for (tagId of selectedTags(); track tagId) {
+              @for (tag of tags(); track tag.tagId) {
+              @if (tag.tagId === tagId) {
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-600 text-white">
+                {{ tag.tagName }}
+                <button type="button" (click)="toggleTag(tagId)" class="ml-2 hover:text-gray-200">
+                  ×
+                </button>
+              </span>
+              }
+              }
+              }
             </div>
+          </div>
           }
-          
+
           <!-- Suggested/All tags -->
           <div class="flex flex-wrap gap-2">
             @if (tagSearchQuery().length >= 2) {
-              <!-- Show suggested tags when searching -->
-              @if (isSearchingTags()) {
-                <p class="text-sm text-gray-500">Searching...</p>
-              } @else {
-                @for (tag of suggestedTags(); track tag.tagId) {
-                  <button
-                    type="button"
-                    (click)="toggleTag(tag.tagId)"
-                    [class.bg-primary-600]="isTagSelected(tag.tagId)"
-                    [class.text-white]="isTagSelected(tag.tagId)"
-                    [class.bg-gray-200]="!isTagSelected(tag.tagId)"
-                    [class.text-gray-700]="!isTagSelected(tag.tagId)"
-                    class="px-4 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-colors"
-                  >
-                    {{ tag.tagName }}
-                    <span class="ml-1 text-xs opacity-75">({{ tag.questionCount }})</span>
-                  </button>
-                }
-                @if (suggestedTags().length === 0) {
-                  <p class="text-sm text-gray-500">No tags found</p>
-                }
-              }
+            <!-- Show suggested tags when searching -->
+            @if (isSearchingTags()) {
+            <p class="text-sm text-gray-500">Searching...</p>
             } @else {
-              <!-- Show all tags by default -->
-              @for (tag of tags(); track tag.tagId) {
-                <button
-                  type="button"
-                  (click)="toggleTag(tag.tagId)"
-                  [class.bg-primary-600]="isTagSelected(tag.tagId)"
-                  [class.text-white]="isTagSelected(tag.tagId)"
-                  [class.bg-gray-200]="!isTagSelected(tag.tagId)"
-                  [class.text-gray-700]="!isTagSelected(tag.tagId)"
-                  class="px-4 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-colors"
-                >
-                  {{ tag.tagName }}
-                </button>
-              }
+            @for (tag of suggestedTags(); track tag.tagId) {
+            <button type="button" (click)="toggleTag(tag.tagId)" [class.bg-primary-600]="isTagSelected(tag.tagId)"
+              [class.text-white]="isTagSelected(tag.tagId)" [class.bg-gray-200]="!isTagSelected(tag.tagId)"
+              [class.text-gray-700]="!isTagSelected(tag.tagId)"
+              class="px-4 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-colors">
+              {{ tag.tagName }}
+              <span class="ml-1 text-xs opacity-75">({{ tag.questionCount }})</span>
+            </button>
+            }
+            @if (suggestedTags().length === 0) {
+            <p class="text-sm text-gray-500">No tags found</p>
+            }
+            }
+            } @else {
+            <!-- Show all tags by default -->
+            @for (tag of tags(); track tag.tagId) {
+            <button type="button" (click)="toggleTag(tag.tagId)" [class.bg-primary-600]="isTagSelected(tag.tagId)"
+              [class.text-white]="isTagSelected(tag.tagId)" [class.bg-gray-200]="!isTagSelected(tag.tagId)"
+              [class.text-gray-700]="!isTagSelected(tag.tagId)"
+              class="px-4 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-colors">
+              {{ tag.tagName }}
+            </button>
+            }
             }
           </div>
-          
+
           @if (selectedTags().length === 0) {
-            <p class="text-sm text-gray-500 mt-2">Please select at least one tag</p>
+          <p class="text-sm text-gray-500 mt-2">Please select at least one tag</p>
           }
         </div>
 
@@ -189,13 +159,9 @@
           <label for="imageUrl" class="block text-sm font-medium text-gray-700 mb-2">
             Image URL (Optional)
           </label>
-          <input
-            id="imageUrl"
-            type="url"
-            formControlName="imageUrl"
+          <input id="imageUrl" type="url" formControlName="imageUrl"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="https://example.com/image.png"
-          />
+            placeholder="https://example.com/image.png" />
           <p class="text-sm text-gray-500 mt-1">Enter a URL to an image that helps illustrate your question</p>
         </div>
 
@@ -205,38 +171,27 @@
             Attachment File (Optional)
           </label>
           <div class="flex items-center gap-4">
-            <label
-              for="attachmentFile"
-              class="flex-1 cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
+            <label for="attachmentFile"
+              class="flex-1 cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               Choose File
             </label>
-            <input
-              id="attachmentFile"
-              type="file"
-              (change)="onFileSelected($event)"
-              class="hidden"
-              accept=".pdf,.doc,.docx,.txt,.zip,.rar"
-            />
+            <input id="attachmentFile" type="file" (change)="onFileSelected($event)" class="hidden"
+              accept=".pdf,.doc,.docx,.txt,.zip,.rar" />
             @if (selectedFileName()) {
-              <div class="flex items-center gap-2 flex-1">
-                <span class="text-sm text-gray-700 truncate">{{ selectedFileName() }}</span>
-                <button
-                  type="button"
-                  (click)="removeFile()"
-                  class="text-red-600 hover:text-red-700"
-                  title="Remove file"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+            <div class="flex items-center gap-2 flex-1">
+              <span class="text-sm text-gray-700 truncate">{{ selectedFileName() }}</span>
+              <button type="button" (click)="removeFile()" class="text-red-600 hover:text-red-700" title="Remove file">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             } @else {
-              <span class="text-sm text-gray-500 flex-1">No file chosen</span>
+            <span class="text-sm text-gray-500 flex-1">No file chosen</span>
             }
           </div>
           <p class="text-sm text-gray-500 mt-1">Supported formats: PDF, DOC, DOCX, TXT, ZIP, RAR (Max 10MB)</p>
@@ -244,22 +199,16 @@
 
         <!-- Submit Buttons -->
         <div class="flex gap-4">
-          <button
-            type="submit"
-            [disabled]="isLoading()"
-            class="flex-1 px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-          >
+          <button type="submit" [disabled]="isLoading()"
+            class="flex-1 px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium">
             @if (isLoading()) {
-              <span>Posting...</span>
+            <span>Posting...</span>
             } @else {
-              <span>Post Question</span>
+            <span>Post Question</span>
             }
           </button>
-          <button
-            type="button"
-            (click)="router.navigate(['/'])"
-            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 font-medium"
-          >
+          <button type="button" (click)="router.navigate(['/'])"
+            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 font-medium">
             Cancel
           </button>
         </div>
@@ -267,4 +216,3 @@
     </div>
   </div>
 </div>
-

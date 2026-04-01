@@ -9,6 +9,7 @@ import { TagService } from '../../services/tag.service';
 import { UploadService } from '../../services/upload.service';
 import { Category } from '../../models/category.model';
 import { TagDetail } from '../../models/tag.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-create-question',
@@ -181,7 +182,7 @@ export class CreateQuestionComponent implements OnInit {
       } else if (this.uploadedFilePath()) {
         // File already uploaded, use the fileUrl
         const filePath = this.uploadedFilePath()!;
-        fileUrl = `http://localhost:5134/${filePath}`;
+        fileUrl = `${environment.baseUrl}/${filePath}`;
       }
 
       const questionData = {

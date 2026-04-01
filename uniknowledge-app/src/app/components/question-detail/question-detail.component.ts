@@ -12,6 +12,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
 import { VotingComponent } from '../shared/voting/voting.component';
 import { AnswerListComponent } from '../shared/answer-list/answer-list.component';
 import { AnswerFormComponent } from '../shared/answer-form/answer-form.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-question-detail',
@@ -56,8 +57,8 @@ export class QuestionDetailComponent implements OnInit {
 
   loadAnswers(questionId: number): void {
     this.answerService.getAnswersByQuestionId(questionId).subscribe({
-      next: (answers) => {
-        this.answers.set(answers);
+      next: (result) => {
+        this.answers.set(result.items);
       }
     });
   }
@@ -161,7 +162,7 @@ export class QuestionDetailComponent implements OnInit {
     if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
       return fileUrl;
     }
-    const baseUrl = 'http://localhost:5134';
+    const baseUrl = environment.baseUrl;
     return fileUrl.startsWith('/') ? `${baseUrl}${fileUrl}` : `${baseUrl}/${fileUrl}`;
   }
 

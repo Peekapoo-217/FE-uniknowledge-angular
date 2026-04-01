@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/user.model';
 import { SignalRService } from './signalr.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private signalRService = inject(SignalRService);
-  private apiUrl = 'http://localhost:5134/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   // Signals for reactive state management
   currentUser = signal<User | null>(null);

@@ -3,20 +3,24 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserProfile, UpdateProfileRequest, ChangePasswordRequest } from '../models/user-profile.model';
 import { Question } from '../models/question.model';
+import { CursorPagedResult } from '../models/cursor-pagination.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserProfileService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5134/api/userprofile';
+  private apiUrl = `${environment.apiUrl}/userprofile`;
 
   getMyProfile(): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.apiUrl}/me`);
   }
 
-  getMyQuestions(): Observable<Question[]> {
-    return this.http.get<Question[]>(`${this.apiUrl}/me/questions`);
+  getMyQuestions(limit: number = 20, after?: string): Observable<CursorPagedResult<Question>> {
+    let params = new HttpParams().set('limit', limit.toString());
+    if (after) params = params.set('after', after);
+    return this.http.get<CursorPagedResult<Question>>(`${this.apiUrl}/me/questions`, { params });
   }
 
   updateMyProfile(data: UpdateProfileRequest): Observable<UserProfile> {
@@ -31,14 +35,17 @@ export class UserProfileService {
     return this.http.get<UserProfile>(`${this.apiUrl}/${userId}`);
   }
 
-  getUserQuestions(userId: number): Observable<Question[]> {
-    return this.http.get<Question[]>(`${this.apiUrl}/${userId}/questions`);
+  getUserQuestions(userId: number, limit: number = 20, after?: string): Observable<CursorPagedResult<Question>> {
+    let params = new HttpParams().set('limit', limit.toString());
+    if (after) params = params.set('after', after);
+    return this.http.get<CursorPagedResult<Question>>(`${this.apiUrl}/${userId}/questions`, { params });
   }
+
   uploadAvatar(file: File): Observable<UserProfile> {
-  const formData = new FormData();
-  formData.append('file', file);
-  return this.http.post<UserProfile>(`${this.apiUrl}/me/upload-avatar`, formData);
-}
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UserProfile>(`${this.apiUrl}/me/upload-avatar`, formData);
+  }
 
   searchUsers(searchTerm: string, limit: number = 20): Observable<UserProfile[]> {
     let params = new HttpParams().set('limit', limit.toString());
