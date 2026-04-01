@@ -2,32 +2,34 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Question, CreateQuestionRequest, UpdateQuestionRequest } from '../models/question.model';
+import { CursorPagedResult } from '../models/cursor-pagination.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5134/api/questions';
+  private apiUrl = `${environment.apiUrl}/questions`;
 
   getQuestions(
     search?: string,
     categoryId?: number,
     tagId?: number,
     status?: string,
-    page: number = 1,
-    pageSize: number = 20
-  ): Observable<Question[]> {
+    limit: number = 20,
+    after?: string
+  ): Observable<CursorPagedResult<Question>> {
     let params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
+      .set('limit', limit.toString());
 
     if (search) params = params.set('search', search);
     if (categoryId) params = params.set('categoryId', categoryId.toString());
     if (tagId) params = params.set('tagId', tagId.toString());
     if (status) params = params.set('status', status);
+    if (after) params = params.set('after', after);
 
-    return this.http.get<Question[]>(this.apiUrl, { params });
+    return this.http.get<CursorPagedResult<Question>>(this.apiUrl, { params });
   }
 
   getQuestionById(id: number): Observable<Question> {
@@ -46,4 +48,3 @@ export class QuestionService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { observe: 'body' });
   }
 }
-

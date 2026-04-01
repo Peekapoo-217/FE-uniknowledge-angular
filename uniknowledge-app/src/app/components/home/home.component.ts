@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuestionService } from '../../services/question.service';
@@ -26,15 +26,20 @@ export class HomeComponent implements OnInit {
   categories = signal<Category[]>([]);
   popularTags = signal<TagDetail[]>([]);
   isLoading = signal<boolean>(false);
+  isLoadingMore = signal<boolean>(false);
 
   searchTerm = '';
   selectedCategoryId?: number;
   selectedTagIds = signal<number[]>([]);
 
-  // Pagination
-  currentPage = signal<number>(1);
-  pageSize = 20;
-  totalQuestions = signal<number>(0);
+  // Cursor pagination
+  endCursor = signal<string | undefined>(undefined);
+  hasNextPage = signal<boolean>(false);
+  pageSize = 5;
+
+  // Tag filter cursor
+  tagFilterEndCursor = signal<string | undefined>(undefined);
+  tagFilterHasNextPage = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadQuestions();
@@ -42,23 +47,67 @@ export class HomeComponent implements OnInit {
     this.loadPopularTags();
   }
 
+  @HostListener('window:scroll')
+  onScroll(): void {
+    // Infinite scroll: load more when near bottom
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
+    const threshold = 200; // pixels from bottom
+
+    if (scrollPosition >= documentHeight - threshold && !this.isLoading() && !this.isLoadingMore()) {
+      if (this.selectedTagIds().length > 0) {
+        if (this.tagFilterHasNextPage()) {
+          this.loadMoreQuestionsWithMultipleTags();
+        }
+      } else {
+        if (this.hasNextPage()) {
+          this.loadMoreQuestions();
+        }
+      }
+    }
+  }
+
   loadQuestions(): void {
     this.isLoading.set(true);
+    this.endCursor.set(undefined);
     this.questionService.getQuestions(
       this.searchTerm || undefined,
       this.selectedCategoryId,
-      undefined,  // No single tag filter, using selectedTagIds instead
       undefined,
-      this.currentPage(),
+      undefined,
       this.pageSize
     ).subscribe({
-      next: (questions) => {
-        this.questions.set(questions);
-        this.totalQuestions.set(questions.length);
+      next: (result) => {
+        this.questions.set(result.items);
+        this.endCursor.set(result.pageInfo.endCursor ?? undefined);
+        this.hasNextPage.set(result.pageInfo.hasNextPage);
         this.isLoading.set(false);
       },
       error: () => {
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadMoreQuestions(): void {
+    if (!this.hasNextPage() || this.isLoadingMore()) return;
+    this.isLoadingMore.set(true);
+    this.questionService.getQuestions(
+      this.searchTerm || undefined,
+      this.selectedCategoryId,
+      undefined,
+      undefined,
+      this.pageSize,
+      this.endCursor()
+    ).subscribe({
+      next: (result) => {
+        this.questions.update(current => [...current, ...result.items]);
+        this.endCursor.set(result.pageInfo.endCursor ?? undefined);
+        this.hasNextPage.set(result.pageInfo.hasNextPage);
+        this.isLoadingMore.set(false);
+      },
+      error: () => {
+        this.isLoadingMore.set(false);
       }
     });
   }
@@ -68,9 +117,7 @@ export class HomeComponent implements OnInit {
       next: (categories) => {
         this.categories.set(categories);
       },
-      error: () => {
-        // Error loading categories
-      }
+      error: () => { }
     });
   }
 
@@ -79,9 +126,7 @@ export class HomeComponent implements OnInit {
       next: (tags) => {
         this.popularTags.set(tags);
       },
-      error: () => {
-        // Error loading tags
-      }
+      error: () => { }
     });
   }
 
@@ -91,7 +136,6 @@ export class HomeComponent implements OnInit {
 
   onCategoryChange(categoryId: string): void {
     this.selectedCategoryId = categoryId ? parseInt(categoryId) : undefined;
-    this.currentPage.set(1);  // Reset to page 1 when filter changes
     this.loadQuestions();
   }
 
@@ -100,10 +144,8 @@ export class HomeComponent implements OnInit {
     const index = currentTags.indexOf(tagId);
 
     if (index > -1) {
-      // Remove tag
       this.selectedTagIds.set(currentTags.filter(id => id !== tagId));
     } else {
-      // Add tag
       this.selectedTagIds.set([...currentTags, tagId]);
     }
 
@@ -119,14 +161,16 @@ export class HomeComponent implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.tagFilterEndCursor.set(undefined);
     this.tagService.filterQuestionsByTags({
       tagIds: tagIds,
-      logic: 'OR',  // Always use OR logic for multiple tags
-      page: 1,
-      pageSize: 20
+      logic: 'OR',
+      limit: 20
     }).subscribe({
       next: (response) => {
-        this.questions.set(response.questions);
+        this.questions.set(response.items);
+        this.tagFilterEndCursor.set(response.pageInfo.endCursor ?? undefined);
+        this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
         this.isLoading.set(false);
       },
       error: () => {
@@ -135,31 +179,32 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  loadMoreQuestionsWithMultipleTags(): void {
+    if (!this.tagFilterHasNextPage() || this.isLoadingMore()) return;
+    this.isLoadingMore.set(true);
+    this.tagService.filterQuestionsByTags({
+      tagIds: this.selectedTagIds(),
+      logic: 'OR',
+      limit: 20,
+      after: this.tagFilterEndCursor()
+    }).subscribe({
+      next: (response) => {
+        this.questions.update(current => [...current, ...response.items]);
+        this.tagFilterEndCursor.set(response.pageInfo.endCursor ?? undefined);
+        this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
+        this.isLoadingMore.set(false);
+      },
+      error: () => {
+        this.isLoadingMore.set(false);
+      }
+    });
+  }
+
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedCategoryId = undefined;
     this.selectedTagIds.set([]);
-    this.currentPage.set(1);
     this.loadQuestions();
-  }
-
-  // Pagination methods
-  nextPage(): void {
-    this.currentPage.update(page => page + 1);
-    this.loadQuestions();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  previousPage(): void {
-    if (this.currentPage() > 1) {
-      this.currentPage.update(page => page - 1);
-      this.loadQuestions();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  get hasNextPage(): boolean {
-    return this.questions().length === this.pageSize;
   }
 
   formatDate(date: Date): string {
@@ -177,4 +222,3 @@ export class HomeComponent implements OnInit {
     return 'just now';
   }
 }
-

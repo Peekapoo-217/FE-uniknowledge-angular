@@ -2,16 +2,20 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Answer, CreateAnswerRequest, UpdateAnswerRequest } from '../models/answer.model';
+import { CursorPagedResult } from '../models/cursor-pagination.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnswerService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5134/api';
+  private apiUrl = environment.apiUrl;
 
-  getAnswersByQuestionId(questionId: number): Observable<Answer[]> {
-    return this.http.get<Answer[]>(`${this.apiUrl}/questions/${questionId}/answers`);
+  getAnswersByQuestionId(questionId: number, limit: number = 20, after?: string): Observable<CursorPagedResult<Answer>> {
+    let params: any = { limit: limit.toString() };
+    if (after) params.after = after;
+    return this.http.get<CursorPagedResult<Answer>>(`${this.apiUrl}/questions/${questionId}/answers`, { params });
   }
 
   createAnswer(questionId: number, answer: CreateAnswerRequest): Observable<Answer> {
@@ -30,4 +34,3 @@ export class AnswerService {
     return this.http.put<{ message: string }>(`${this.apiUrl}/answers/${id}/accept`, {});
   }
 }
-
