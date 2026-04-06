@@ -30,7 +30,7 @@
         <div class="flex items-center gap-4 text-sm text-gray-600">
           <span>Asked by <span class="font-medium">{{ question()!.username }}</span></span>
           <span>•</span>
-          <span>{{ formatDate(question()!.createdAt) }}</span>
+          <span>{{ question()!.createdAt | timeAgo }}</span>
           <span>•</span>
           <span>{{ question()!.viewCount }} views</span>
         </div>

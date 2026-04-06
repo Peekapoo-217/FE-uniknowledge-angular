@@ -113,9 +113,9 @@
           </div>
 
           <div class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500">
-            Created {{ formatDate(question.createdAt) }}
+            Created {{ question.createdAt | date:'longDate' }}
             @if (question.updatedAt) {
-            · Updated {{ formatDate(question.updatedAt) }}
+            · Updated {{ question.updatedAt | date:'longDate' }}
             }
           </div>
         </div>

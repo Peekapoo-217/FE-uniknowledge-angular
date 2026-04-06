@@ -83,7 +83,8 @@ export class HomeComponent implements OnInit {
         this.hasNextPage.set(result.pageInfo.hasNextPage);
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading questions:', err);
         this.isLoading.set(false);
       }
     });
@@ -106,7 +107,8 @@ export class HomeComponent implements OnInit {
         this.hasNextPage.set(result.pageInfo.hasNextPage);
         this.isLoadingMore.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading more questions:', err);
         this.isLoadingMore.set(false);
       }
     });
@@ -117,7 +119,9 @@ export class HomeComponent implements OnInit {
       next: (categories) => {
         this.categories.set(categories);
       },
-      error: () => { }
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
     });
   }
 
@@ -126,7 +130,9 @@ export class HomeComponent implements OnInit {
       next: (tags) => {
         this.popularTags.set(tags);
       },
-      error: () => { }
+      error: (err) => {
+        console.error('Error loading popular tags:', err);
+      }
     });
   }
 
@@ -173,7 +179,8 @@ export class HomeComponent implements OnInit {
         this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading questions by tags:', err);
         this.isLoading.set(false);
       }
     });
@@ -194,7 +201,8 @@ export class HomeComponent implements OnInit {
         this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
         this.isLoadingMore.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading more questions by tags:', err);
         this.isLoadingMore.set(false);
       }
     });
@@ -207,18 +215,5 @@ export class HomeComponent implements OnInit {
     this.loadQuestions();
   }
 
-  formatDate(date: Date): string {
-    const d = new Date(date);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
 
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return 'just now';
-  }
 }

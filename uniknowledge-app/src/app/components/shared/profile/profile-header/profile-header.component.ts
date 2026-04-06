@@ -17,12 +17,5 @@ export class ProfileHeaderComponent {
     createdAt = input.required<Date>();
     showEditButton = input<boolean>(true);
 
-    formatDate(date: Date): string {
-        const d = new Date(date);
-        return d.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
+
 }

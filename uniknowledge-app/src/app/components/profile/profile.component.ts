@@ -42,7 +42,8 @@ export class ProfileComponent implements OnInit {
         this.profile.set(profile);
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading profile:', err);
         this.isLoading.set(false);
       }
     });
@@ -55,7 +56,8 @@ export class ProfileComponent implements OnInit {
         this.questions.set(result.items);
         this.isLoadingQuestions.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading my questions:', err);
         this.isLoadingQuestions.set(false);
       }
     });
@@ -81,6 +83,7 @@ export class ProfileComponent implements OnInit {
             this.loadMyQuestions();
           },
           error: (error) => {
+            console.error('Error deleting question:', error);
             alert(error.error?.message || 'Failed to delete question');
           }
         });
@@ -88,14 +91,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  formatDate(date: Date): string {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
+
 
   getStatusBadgeClass(status: string): string {
     switch (status) {

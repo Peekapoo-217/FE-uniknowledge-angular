@@ -14,10 +14,12 @@ import { AnswerListComponent } from '../shared/answer-list/answer-list.component
 import { AnswerFormComponent } from '../shared/answer-form/answer-form.component';
 import { environment } from '../../../environments/environment';
 
+import { TimeAgoPipe } from '../shared/pipes/time-ago.pipe';
+
 @Component({
   selector: 'app-question-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, VotingComponent, AnswerListComponent, AnswerFormComponent],
+  imports: [CommonModule, RouterLink, VotingComponent, AnswerListComponent, AnswerFormComponent, TimeAgoPipe],
   templateUrl: './question-detail.component.html',
   styleUrls: ['./question-detail.component.scss']
 })
@@ -49,7 +51,8 @@ export class QuestionDetailComponent implements OnInit {
         this.question.set(question);
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading question:', err);
         this.isLoading.set(false);
       }
     });
@@ -59,6 +62,9 @@ export class QuestionDetailComponent implements OnInit {
     this.answerService.getAnswersByQuestionId(questionId).subscribe({
       next: (result) => {
         this.answers.set(result.items);
+      },
+      error: (err) => {
+        console.error('Error loading answers:', err);
       }
     });
   }
@@ -128,16 +134,7 @@ export class QuestionDetailComponent implements OnInit {
     });
   }
 
-  formatDate(date: Date): string {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+
 
   getFileName(fileUrl: string): string {
     try {
@@ -195,26 +192,32 @@ export class QuestionDetailComponent implements OnInit {
       panelClass: 'confirmation-dialog-panel'
     });
 
-    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
-      if (confirmed) {
-        this.questionService.deleteQuestion(question.questionId).subscribe({
-          next: () => {
-            this.router.navigate(['/']);
-          },
-          error: (error) => {
-            let errorMessage = 'Failed to delete question. Please try again.';
-            if (error.status === 404) {
-              errorMessage = error.error?.message || 'Question not found or you do not have permission to delete it.';
-            } else if (error.status === 401) {
-              errorMessage = 'You are not authenticated. Please login again.';
-            } else if (error.status === 403) {
-              errorMessage = 'You do not have permission to delete this question.';
-            } else if (error.error?.message) {
-              errorMessage = error.error.message;
+    dialogRef.afterClosed().subscribe({
+      next: (confirmed: boolean) => {
+        if (confirmed) {
+          this.questionService.deleteQuestion(question.questionId).subscribe({
+            next: () => {
+              this.router.navigate(['/']);
+            },
+            error: (error) => {
+              console.error('Error deleting question:', error);
+              let errorMessage = 'Failed to delete question. Please try again.';
+              if (error.status === 404) {
+                errorMessage = error.error?.message || 'Question not found or you do not have permission to delete it.';
+              } else if (error.status === 401) {
+                errorMessage = 'You are not authenticated. Please login again.';
+              } else if (error.status === 403) {
+                errorMessage = 'You do not have permission to delete this question.';
+              } else if (error.error?.message) {
+                errorMessage = error.error.message;
+              }
+              alert(errorMessage);
             }
-            alert(errorMessage);
-          }
-        });
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error in confirmation dialog:', err);
       }
     });
   }

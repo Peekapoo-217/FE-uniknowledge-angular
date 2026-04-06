@@ -14,7 +14,7 @@
             <div class="flex items-center gap-2 text-sm text-gray-600">
                 <span>answered by <span class="font-medium">{{ answer().username }}</span></span>
                 <span>•</span>
-                <span>{{ formatDate(answer().createdAt) }}</span>
+                <span>{{ answer().createdAt | timeAgo }}</span>
             </div>
         </div>
     </div>

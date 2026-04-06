@@ -33,6 +33,8 @@ FE/uniknowledge-app/
 │   │   │   ├── register/         # Đăng ký
 │   │   │   ├── reset-password/   # Đặt lại mật khẩu
 │   │   │   ├── shared/           # Components dùng chung
+│   │   │   │   ├── pipes/        # Custom Pipes (`time-ago.pipe.ts`)
+│   │   │   │   └── ...
 │   │   │   └── tags/             # Xem danh sách tags
 │   │   ├── guards/               # Route Guards
 │   │   │   ├── auth.guard.ts     # Kiểm tra đăng nhập
@@ -478,6 +480,7 @@ interface TypingIndicator { userId: number; username?: string; }
 |-----------|-------|
 | **NavbarComponent** | Thanh điều hướng: logo, menu, user avatar, unread badge, admin menu |
 | **ConfirmationDialogComponent** | Dialog xác nhận hành động (Material Dialog) |
+| **TimeAgoPipe** | Chuyển đổi Date thành chuỗi tương đối (vd: "3 hours ago") |
 | **SharedComponents** | Components tái sử dụng chung |
 
 ---
@@ -539,11 +542,22 @@ Forgot Password page
 
 ---
 
+## 🛠️ Quy tắc phát triển (Development Rules)
+
+- **Error Handling**: Mọi lượt gọi API `.subscribe()` bắt buộc phải có khối xử lý lỗi (`error: (err) => console.error(err)`).
+- **Date Formatting**: Ưu tiên sử dụng Pipe thay vì viết hàm `formatDate` thủ công trong Component.
+    - Dùng `| timeAgo` cho thời gian tương đối.
+    - Dùng `| date:'longDate'` cho thời gian tuyệt đối.
+- **Standalone**: Tất cả Components, Pipes, Directives đều phải là Standalone.
+
+---
+
 ## 📊 Tổng Kết
 
 | Hạng mục | Số lượng |
 |----------|---------|
 | Components | 19 |
+| Pipes | 1 (`TimeAgoPipe`) |
 | Services | 11 |
 | Models | 8 |
 | Guards | 2 |

@@ -18,7 +18,7 @@
             <p class="text-lg text-gray-600">{{ fullName() }}</p>
             }
             <p class="text-sm text-gray-500 mt-1">{{ email() }}</p>
-            <p class="text-sm text-gray-500">Member since {{ formatDate(createdAt()) }}</p>
+            <p class="text-sm text-gray-500">Member since {{ createdAt() | date:'longDate' }}</p>
         </div>
     </div>
 
