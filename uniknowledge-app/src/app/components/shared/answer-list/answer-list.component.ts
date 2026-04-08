@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Answer } from '../../../models/answer.model';
 import { AnswerItemComponent } from '../answer-item/answer-item.component';
@@ -15,6 +15,15 @@ export class AnswerListComponent {
     answerCount = input.required<number>();
     currentUserId = input<number | null>(null);
     isAuthenticated = input<boolean>(false);
+
+    // Group answers by parentId
+    topLevelAnswers = computed(() => this.answers().filter(a => !a.parentId));
+    
+    getRepliesFor(parentId: number): Answer[] {
+        return this.answers().filter(a => a.parentId === parentId);
+    }
+
+    submitReply = output<{ content: string, codeContent?: string, codeLanguage?: string, parentId: number }>();
 
     upvote = output<number>();
     downvote = output<number>();

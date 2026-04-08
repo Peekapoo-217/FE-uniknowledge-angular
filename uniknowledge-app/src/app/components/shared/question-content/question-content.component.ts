@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Question } from '../../../models/question.model';
+import { Question, QuestionSummary } from '../../../models/question.model';
 
 import { TimeAgoPipe } from '../pipes/time-ago.pipe';
 
@@ -13,7 +13,7 @@ import { TimeAgoPipe } from '../pipes/time-ago.pipe';
     styleUrls: ['./question-content.component.scss']
 })
 export class QuestionContentComponent {
-    question = input.required<Question>();
+    question = input.required<QuestionSummary>();
     tagClick = output<number>();
 
 

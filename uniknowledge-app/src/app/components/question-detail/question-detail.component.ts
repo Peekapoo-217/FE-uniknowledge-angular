@@ -13,13 +13,15 @@ import { VotingComponent } from '../shared/voting/voting.component';
 import { AnswerListComponent } from '../shared/answer-list/answer-list.component';
 import { AnswerFormComponent } from '../shared/answer-form/answer-form.component';
 import { environment } from '../../../environments/environment';
+import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
+
 
 import { TimeAgoPipe } from '../shared/pipes/time-ago.pipe';
 
 @Component({
   selector: 'app-question-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, VotingComponent, AnswerListComponent, AnswerFormComponent, TimeAgoPipe],
+  imports: [CommonModule, RouterLink, VotingComponent, AnswerListComponent, AnswerFormComponent, TimeAgoPipe, CodeEditorComponent],
   templateUrl: './question-detail.component.html',
   styleUrls: ['./question-detail.component.scss']
 })
@@ -119,17 +121,31 @@ export class QuestionDetailComponent implements OnInit {
     });
   }
 
-  onSubmitAnswer(content: string): void {
+  onSubmitAnswer(answerData: { content: string, codeContent?: string, codeLanguage?: string }): void {
     const question = this.question();
     if (!question) return;
 
-    this.answerService.createAnswer(question.questionId, { content }).subscribe({
+    this.answerService.createAnswer(question.questionId, answerData).subscribe({
       next: () => {
         this.loadAnswers(question.questionId);
         this.loadQuestion(question.questionId);
       },
       error: (error) => {
         alert(error.error?.message || 'Failed to submit answer');
+      }
+    });
+  }
+
+  onSubmitReply(replyData: { content: string, codeContent?: string, codeLanguage?: string, parentId: number }): void {
+    const question = this.question();
+    if (!question) return;
+
+    this.answerService.createAnswer(question.questionId, replyData).subscribe({
+      next: () => {
+        this.loadAnswers(question.questionId);
+      },
+      error: (error) => {
+        alert(error.error?.message || 'Failed to submit reply');
       }
     });
   }

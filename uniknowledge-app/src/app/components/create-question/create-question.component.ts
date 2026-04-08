@@ -10,11 +10,13 @@ import { UploadService } from '../../services/upload.service';
 import { Category } from '../../models/category.model';
 import { TagDetail } from '../../models/tag.model';
 import { environment } from '../../../environments/environment';
+import { CodeEditorComponent } from '../shared/code-editor/code-editor.component';
+
 
 @Component({
   selector: 'app-create-question',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, CodeEditorComponent],
   templateUrl: './create-question.component.html',
   styleUrls: ['./create-question.component.scss']
 })
@@ -43,10 +45,12 @@ export class CreateQuestionComponent implements OnInit {
   constructor() {
     this.questionForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(255)]],
-      content: ['', [Validators.required, Validators.minLength(20)]],
+      content: [''],
       categoryId: ['', [Validators.required]],
       imageUrl: [''],
-      attachmentFile: [null]
+      attachmentFile: [null],
+      codeContent: [''],
+      codeLanguage: ['javascript']
     });
   }
 
@@ -191,7 +195,9 @@ export class CreateQuestionComponent implements OnInit {
         categoryId: parseInt(formValue.categoryId),
         tagIds: this.selectedTags(),
         imageUrl: formValue.imageUrl?.trim() || undefined,
-        fileUrl: fileUrl // Send fileUrl to backend
+        fileUrl: fileUrl, // Send fileUrl to backend
+        codeContent: formValue.codeContent?.trim() || undefined,
+        codeLanguage: formValue.codeLanguage
       };
 
       this.questionService.createQuestion(questionData).subscribe({

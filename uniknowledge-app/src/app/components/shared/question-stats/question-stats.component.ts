@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Question } from '../../../models/question.model';
+import { Question, QuestionSummary } from '../../../models/question.model';
 
 @Component({
     selector: 'app-question-stats',
@@ -10,5 +10,5 @@ import { Question } from '../../../models/question.model';
     styleUrls: ['./question-stats.component.scss']
 })
 export class QuestionStatsComponent {
-    question = input.required<Question>();
+    question = input.required<QuestionSummary>();
 }

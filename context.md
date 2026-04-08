@@ -13,11 +13,11 @@ Tài liệu tóm lược cho AI Coding Assistant nhằm hỗ trợ phát triển
 - **Styling**: **Tailwind CSS** (v3+), SCSS (với BEM naming nội bộ nếu cần).
 - **Xử lý luồng dữ liệu**: **RxJS** (chủ yếu dùng cho HTTP requests).
 - **Real-time**: **@microsoft/signalr**.
-- **Thư viện chính**: `Angular Material` (Dialogs), `Lucide icons`.
+- **Thư viện chính**: `Angular Material` (Dialogs), `Lucide icons`, `ngx-monaco-editor-v2` (Monaco Editor).
 
 ## 3. Folder Structure
 - `src/app/components/`:
-    - `shared/`: Các component dùng chung (Voting, QuestionList, Pipes...).
+    - `shared/`: Các component dùng chung (Voting, QuestionList, CodeEditor, Pipes...).
     - Các page-specific components (Home, QuestionDetail, Profile...).
 - `src/app/services/`: Logic gọi API và xử lý dữ liệu trung tâm (`AuthService`, `QuestionService`, `SignalRService`).
 - `src/app/models/`: Định nghĩa Interfaces/Models cho dữ liệu (Question, Tag, User).
@@ -36,6 +36,7 @@ Tài liệu tóm lược cho AI Coding Assistant nhằm hỗ trợ phát triển
 - **Shared Components**:
     - `QuestionListComponent`: Danh sách câu hỏi có hỗ trợ vô tận (Infinite Scroll).
     - `VotingComponent`: Xử lý click Upvote/Downvote.
+    - `CodeEditorComponent`: Editor đa ngôn ngữ, hỗ trợ Format và Run code (Javascript).
     - `TimeAgoPipe`: Chuyển Date thành dạng tương đối (ví dụ: "3 days ago").
 
 ## 6. State Management Flow

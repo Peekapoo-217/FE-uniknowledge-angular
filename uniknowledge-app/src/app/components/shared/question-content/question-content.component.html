@@ -8,7 +8,7 @@
 
   <!-- Content Preview -->
   <div class="text-gray-600 mb-3 line-clamp-2">
-    {{ question().content.substring(0, 200) }}...
+    {{ question().content }}
   </div>
 
   <!-- Tags -->
@@ -25,12 +25,12 @@
   <!-- Meta Information -->
   <div class="flex items-center justify-between text-sm text-gray-500">
     <div class="flex items-center gap-2">
-      @if (question().categoryName) {
-      <span class="text-primary-600">{{ question().categoryName }}</span>
+      @if (question().category?.categoryName) {
+      <span class="text-primary-600">{{ question().category?.categoryName }}</span>
       }
     </div>
     <div class="flex items-center gap-2">
-      <span>asked by <span class="font-medium text-gray-700">{{ question().username }}</span></span>
+      <span>asked by <span class="font-medium text-gray-700">{{ question().user.username }}</span></span>
       <span>•</span>
       <span>{{ question().createdAt | timeAgo }}</span>
     </div>

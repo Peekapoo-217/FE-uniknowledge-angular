@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Question, CreateQuestionRequest, UpdateQuestionRequest } from '../models/question.model';
+import { Question, QuestionSummary, CreateQuestionRequest, UpdateQuestionRequest } from '../models/question.model';
 import { CursorPagedResult } from '../models/cursor-pagination.model';
 import { environment } from '../../environments/environment';
 
@@ -19,7 +19,7 @@ export class QuestionService {
     status?: string,
     limit: number = 20,
     after?: string
-  ): Observable<CursorPagedResult<Question>> {
+  ): Observable<CursorPagedResult<QuestionSummary>> {
     let params = new HttpParams()
       .set('limit', limit.toString());
 
@@ -29,11 +29,15 @@ export class QuestionService {
     if (status) params = params.set('status', status);
     if (after) params = params.set('after', after);
 
-    return this.http.get<CursorPagedResult<Question>>(this.apiUrl, { params });
+    return this.http.get<CursorPagedResult<QuestionSummary>>(this.apiUrl, { params });
   }
 
   getQuestionById(id: number): Observable<Question> {
     return this.http.get<Question>(`${this.apiUrl}/${id}`);
+  }
+
+  getQuestionCode(id: number): Observable<string> {
+    return this.http.get(`${this.apiUrl}/${id}/code`, { responseType: 'text' });
   }
 
   createQuestion(question: CreateQuestionRequest): Observable<Question> {

@@ -22,6 +22,10 @@ export class AnswerService {
     return this.http.post<Answer>(`${this.apiUrl}/questions/${questionId}/answers`, answer);
   }
 
+  getAnswerCode(id: number): Observable<string> {
+    return this.http.get(`${this.apiUrl}/answers/${id}/code`, { responseType: 'text' });
+  }
+
   updateAnswer(id: number, answer: UpdateAnswerRequest): Observable<Answer> {
     return this.http.put<Answer>(`${this.apiUrl}/answers/${id}`, answer);
   }
