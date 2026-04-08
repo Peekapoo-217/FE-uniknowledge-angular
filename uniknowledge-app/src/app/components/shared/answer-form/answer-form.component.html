@@ -17,6 +17,31 @@
             </div>
             }
         </div>
+
+        <!-- Toggle for Code Snippet -->
+        <div class="mb-4">
+          <button type="button" 
+                  (click)="toggleCodeEditor()"
+                  class="flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
+            <i class="fas" [class.fa-plus-circle]="!showCodeEditor()" [class.fa-minus-circle]="showCodeEditor()"></i>
+            <span>{{ showCodeEditor() ? 'Remove Code Snippet' : 'Add Code Snippet (Optional)' }}</span>
+          </button>
+        </div>
+
+        <!-- Code Snippet (Monaco Editor) -->
+        @if (showCodeEditor()) {
+          <div class="mb-6 animate-fadeIn">
+            <app-code-editor 
+              [value]="answerForm.get('codeContent')?.value"
+              [language]="answerForm.get('codeLanguage')?.value"
+              (valueChange)="answerForm.get('codeContent')?.setValue($event)"
+              (languageChange)="answerForm.get('codeLanguage')?.setValue($event)">
+            </app-code-editor>
+            <p class="text-xs text-gray-500 mt-1">
+              If your answer involves code, paste it here for better syntax highlighting.
+            </p>
+          </div>
+        }
         <button type="submit"
             class="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
             Post Answer

@@ -8,9 +8,16 @@ export class TimeAgoPipe implements PipeTransform {
   transform(value: string | Date | undefined | null): string {
     if (!value) return '';
 
-    const d = new Date(value);
+    const d = typeof value === 'string' && !value.endsWith('Z') && !value.includes('+') 
+      ? new Date(value + 'Z') 
+      : new Date(value);
+    
     const now = new Date();
     const diff = now.getTime() - d.getTime();
+    
+    // Fallback for future dates due to small clock desync
+    if (diff < 0) return 'just now';
+
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);

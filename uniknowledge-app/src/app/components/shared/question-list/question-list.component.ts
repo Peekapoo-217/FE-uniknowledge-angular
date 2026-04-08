@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Question } from '../../../models/question.model';
+import { Question, QuestionSummary } from '../../../models/question.model';
 import { QuestionItemComponent } from '../question-item/question-item.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { QuestionItemComponent } from '../question-item/question-item.component'
   styleUrls: ['./question-list.component.scss']
 })
 export class QuestionListComponent {
-  questions = input.required<Question[]>();
+  questions = input.required<QuestionSummary[]>();
   tagClick = output<number>();
 
   onTagClick(tagId: number): void {

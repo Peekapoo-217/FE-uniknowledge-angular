@@ -154,6 +154,22 @@
           }
         </div>
 
+        <!-- Code Snippet (Monaco Editor) -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Code Snippet (Optional)
+          </label>
+          <app-code-editor 
+            [value]="questionForm.get('codeContent')?.value"
+            [language]="questionForm.get('codeLanguage')?.value"
+            (valueChange)="questionForm.get('codeContent')?.setValue($event)"
+            (languageChange)="questionForm.get('codeLanguage')?.setValue($event)">
+          </app-code-editor>
+          <p class="text-xs text-gray-500 mt-1">
+            If your question involves code, paste it here for better syntax highlighting.
+          </p>
+        </div>
+
         <!-- Image URL (Optional) -->
         <div class="mb-6">
           <label for="imageUrl" class="block text-sm font-medium text-gray-700 mb-2">

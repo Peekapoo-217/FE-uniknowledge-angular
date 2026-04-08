@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { QuestionService } from '../../services/question.service';
 import { CategoryService } from '../../services/category.service';
 import { TagService } from '../../services/tag.service';
-import { Question } from '../../models/question.model';
+import { Question, QuestionSummary } from '../../models/question.model';
 import { Category } from '../../models/category.model';
 import { TagDetail } from '../../models/tag.model';
 import { QuestionListComponent } from '../shared/question-list/question-list.component';
@@ -22,7 +22,7 @@ export class HomeComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private tagService = inject(TagService);
 
-  questions = signal<Question[]>([]);
+  questions = signal<QuestionSummary[]>([]);
   categories = signal<Category[]>([]);
   popularTags = signal<TagDetail[]>([]);
   isLoading = signal<boolean>(false);

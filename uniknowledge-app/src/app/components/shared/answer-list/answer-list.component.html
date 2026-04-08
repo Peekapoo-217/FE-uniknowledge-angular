@@ -7,9 +7,15 @@
     <p class="text-gray-600 text-center py-8">No answers yet. Be the first to answer!</p>
     } @else {
     <div class="space-y-6">
-        @for (answer of answers(); track answer.answerId) {
-        <app-answer-item [answer]="answer" [showVoteButtons]="canVote(answer)" (upvote)="onUpvote($event)"
-            (downvote)="onDownvote($event)">
+        @for (answer of topLevelAnswers(); track answer.answerId) {
+        <app-answer-item 
+            [answer]="answer" 
+            [replies]="getRepliesFor(answer.answerId)"
+            [showVoteButtons]="canVote(answer)" 
+            [isAuthenticated]="isAuthenticated()"
+            (upvote)="onUpvote($event)"
+            (downvote)="onDownvote($event)"
+            (submitReply)="submitReply.emit($event)">
         </app-answer-item>
         }
     </div>

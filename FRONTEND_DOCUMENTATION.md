@@ -94,6 +94,8 @@ FE/uniknowledge-app/
 | `@angular/forms` | ^20.3.0 | Form handling |
 | `@angular/router` | ^20.3.0 | Client-side routing |
 | `@microsoft/signalr` | ^10.0.0 | Real-time WebSocket |
+| `monaco-editor` | ^0.55.1 | Code Editor Core |
+| `ngx-monaco-editor-v2` | ^21.1.4 | Angular Monaco wrapper |
 | `rxjs` | ~7.8.0 | Reactive programming |
 
 ### Development
@@ -382,32 +384,46 @@ interface LoginRequest { email: string; password: string; }
 interface RegisterRequest { username: string; email: string; password: string; fullName?: string; }
 ```
 
-### Question
+### Question Summary & Detail
+Hệ thống sử dụng cơ chế **Summary/Detail split** để tối ưu hóa hiệu năng truyền tải dữ liệu.
+
 ```typescript
-interface Question {
+export interface QuestionSummary {
   questionId: number;
   title: string;
-  content: string;
+  content: string;            // Thu gọn (200 ký tự)
   viewCount: number;
-  status: string;             // "Open" | "Closed" | "Hidden"
+  status: string;
   imageUrl?: string;
   fileUrl?: string;
-  createdAt: Date;
-  updatedAt?: Date;
+  codeLanguage?: string;
+  codeLineCount: number;      // Dùng để FE quyết định Lazy Load
+  createdAt: string;
+  updatedAt?: string;
+  user: { username: string; avatarUrl?: string; };
+  category?: { categoryId: number; categoryName: string; };
+  tags: Tag[];
+  answerCount: number;
+  voteCount: number;
+}
+
+export interface Question extends Omit<QuestionSummary, 'content' | 'user' | 'category'> {
+  content: string;            // Nội dung đầy đủ
   userId: number;
   username: string;
   avatarUrl?: string;
   categoryId?: number;
   categoryName?: string;
-  tags: Tag[];
-  answerCount: number;
-  voteCount: number;
-  hasAcceptedAnswer: boolean;
+  codeContent?: string;       // Chỉ có giá trị nếu short (< 20 dòng)
 }
-
-interface CreateQuestionRequest { title: string; content: string; categoryId: number; tagIds: number[]; imageUrl?: string; fileUrl?: string; }
-interface UpdateQuestionRequest { title?: string; content?: string; categoryId?: number; tagIds?: number[]; imageUrl?: string; fileUrl?: string; status?: string; }
 ```
+
+### Lazy Loading Logic (Code Editor)
+Để tránh "nghẽn" trình duyệt khi xử lý code lớn:
+1. **Auto-load**: Nếu `codeLineCount < 20`, `codeContent` được tải sẵn.
+2. **On-demand**: Nếu `codeLineCount >= 20`, người dùng phải nhấn nút "Show Code" để tải code từ API `/code`.
+3. **Conditional Rendering**: Editor chỉ hiển thị nếu `codeLanguage` được khai báo.
+
 
 ### Message
 ```typescript
@@ -480,6 +496,7 @@ interface TypingIndicator { userId: number; username?: string; }
 |-----------|-------|
 | **NavbarComponent** | Thanh điều hướng: logo, menu, user avatar, unread badge, admin menu |
 | **ConfirmationDialogComponent** | Dialog xác nhận hành động (Material Dialog) |
+| **CodeEditorComponent** | Editor đa ngôn ngữ (Monaco), hỗ trợ Format & Run (JS) |
 | **TimeAgoPipe** | Chuyển đổi Date thành chuỗi tương đối (vd: "3 hours ago") |
 | **SharedComponents** | Components tái sử dụng chung |
 
