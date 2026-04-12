@@ -1,26 +1,34 @@
-<div class="flex flex-col items-center gap-2 text-sm min-w-[80px]">
+<div class="flex flex-col items-center gap-2 shrink-0 w-16 text-center text-slate-500">
     <!-- Votes -->
-    <div class="text-center">
-        <div class="text-lg font-semibold" [class.text-green-600]="question().voteCount > 0"
-            [class.text-red-600]="question().voteCount < 0">
+    <div class="flex flex-col items-center mt-1">
+        <span class="text-base font-medium text-slate-700">
             {{ question().voteCount }}
-        </div>
-        <div class="text-gray-600">votes</div>
+        </span>
+        <span class="text-[13px]">votes</span>
     </div>
 
     <!-- Answers -->
-    <div class="text-center">
-        <div class="text-lg font-semibold" [class.text-green-600]="question().hasAcceptedAnswer">
-            {{ question().answerCount }}
+    <div class="flex flex-col items-center py-1.5 px-2 rounded min-w-[62px]"
+         [class.bg-emerald-600]="question().hasAcceptedAnswer"
+         [class.text-white]="question().hasAcceptedAnswer"
+         [class.border]="!question().hasAcceptedAnswer && question().answerCount > 0"
+         [class.border-emerald-600]="!question().hasAcceptedAnswer && question().answerCount > 0"
+         [class.text-emerald-700]="!question().hasAcceptedAnswer && question().answerCount > 0"
+         [class.text-slate-500]="question().answerCount === 0">
+        <div class="flex items-center gap-1 font-medium">
+            @if (question().hasAcceptedAnswer) {
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+            }
+            <span class="text-base leading-none">{{ question().answerCount }}</span>
         </div>
-        <div class="text-gray-600">answers</div>
+        <span class="text-[13px] leading-tight">answer{{ question().answerCount !== 1 ? 's' : '' }}</span>
     </div>
 
     <!-- Views -->
-    <div class="text-center">
-        <div class="text-lg font-semibold text-gray-700">
-            {{ question().viewCount }}
-        </div>
-        <div class="text-gray-600">views</div>
+    <div class="flex flex-col items-center text-slate-400">
+        <span class="text-sm font-medium">{{ question().viewCount }}</span>
+        <span class="text-[13px]">views</span>
     </div>
 </div>

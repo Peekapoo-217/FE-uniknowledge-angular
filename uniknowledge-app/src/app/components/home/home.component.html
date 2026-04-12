@@ -1,50 +1,242 @@
-<div class="bg-gray-50 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="min-h-screen bg-[#f8f9f9] pb-12">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div class="flex flex-col lg:flex-row gap-8">
+      
       <!-- Main Content -->
-      <div class="lg:col-span-9">
-        <!-- Loading State -->
-        @if (isLoading()) {
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-          <p class="mt-2 text-gray-600">Loading questions...</p>
-        </div>
-        }
+      <main class="w-full lg:flex-1 min-w-0">
 
-        <!-- Questions List -->
-        @if (!isLoading()) {
-        @if (questions().length === 0) {
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-          <p class="text-gray-600">No questions found. Be the first to ask!</p>
+        <!-- ========== SO-STYLE HEADER ========== -->
+        <div class="flex items-center justify-between mb-6 animate-in">
+          <h1 class="text-[27px] font-normal text-[#232629]">
+            @if (searchTerm) {
+              Search Results
+            } @else if (selectedCategoryId) {
+              Category Questions
+            } @else if (selectedTagIds().length > 0) {
+              Tagged Questions
+            } @else {
+              Top Questions
+            }
+          </h1>
+          <a routerLink="/questions/new"
+             class="so-btn-primary whitespace-nowrap hidden sm:inline-flex">
+            Ask Question
+          </a>
         </div>
-        } @else {
-        <app-question-list [questions]="questions()" (tagClick)="onTagClick($event)">
-        </app-question-list>
 
-        <!-- Infinite Scroll Loading Indicator -->
-        @if (isLoadingMore()) {
-        <div class="mt-6 flex justify-center">
-          <div class="flex items-center gap-3 text-gray-500">
-            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-              viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
-            </svg>
-            <span class="text-sm">Loading more questions...</span>
+        <!-- Search/Filter context -->
+        @if (searchTerm || selectedCategoryId || selectedTagIds().length > 0) {
+          <div class="mb-4 flex items-center gap-3 animate-in">
+            @if (searchTerm) {
+              <span class="text-sm text-slate-500">Results for "<strong class="text-slate-700">{{ searchTerm }}</strong>"</span>
+            }
+            @if (selectedTagIds().length > 0) {
+              <span class="text-sm text-slate-500">{{ selectedTagIds().length }} tag(s) selected</span>
+            }
+            <button (click)="clearFilters()" class="text-xs text-[#0074cc] hover:text-[#0a95ff] font-medium transition-colors">
+              Clear filters
+            </button>
           </div>
-        </div>
         }
-        }
-        }
-      </div>
 
-      <!-- Sidebar -->
-      <div class="mt-8 lg:mt-0 lg:col-span-3">
-        <app-home-sidebar [popularTags]="popularTags()" [categories]="categories()" (tagClick)="onTagClick($event)"
-          (categoryClick)="onCategoryChange($event)">
-        </app-home-sidebar>
-      </div>
+        <!-- ========== FILTER TABS + COUNT ========== -->
+        <div class="flex items-center justify-between border-b border-[#e3e6e8] mb-0 animate-in">
+          <div class="flex">
+            <button (click)="onSortChange('newest')"
+              class="px-4 py-3 text-sm border-b-2 transition-colors"
+              [class.border-[#F48225]]="currentSort === 'newest'"
+              [class.text-[#232629]]="currentSort === 'newest'"
+              [class.font-medium]="currentSort === 'newest'"
+              [class.border-transparent]="currentSort !== 'newest'"
+              [class.text-[#6a737c]]="currentSort !== 'newest'"
+              [class.hover:text-[#3b4045]]="currentSort !== 'newest'">
+              Newest
+            </button>
+            <button (click)="onSortChange('unanswered')"
+              class="px-4 py-3 text-sm border-b-2 transition-colors"
+              [class.border-[#F48225]]="currentSort === 'unanswered'"
+              [class.text-[#232629]]="currentSort === 'unanswered'"
+              [class.font-medium]="currentSort === 'unanswered'"
+              [class.border-transparent]="currentSort !== 'unanswered'"
+              [class.text-[#6a737c]]="currentSort !== 'unanswered'"
+              [class.hover:text-[#3b4045]]="currentSort !== 'unanswered'">
+              Unanswered
+            </button>
+          </div>
+          <span class="text-[13px] text-[#6a737c] pr-1 hidden sm:inline">
+            {{ questions().length }} question{{ questions().length !== 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <!-- ========== LOADING SKELETON ========== -->
+        @if (isLoading()) {
+          <div class="animate-in">
+            @for (i of [1,2,3,4,5]; track i) {
+              <div class="flex gap-4 py-5 px-4 border-b border-[#e3e6e8] bg-white animate-pulse">
+                <!-- Stats skeleton -->
+                <div class="flex flex-col items-center gap-2 w-16 shrink-0">
+                  <div class="h-5 w-8 bg-slate-200 rounded"></div>
+                  <div class="h-3 w-10 bg-slate-100 rounded"></div>
+                  <div class="h-5 w-8 bg-slate-200 rounded"></div>
+                  <div class="h-3 w-12 bg-slate-100 rounded"></div>
+                </div>
+                <!-- Content skeleton -->
+                <div class="flex-1 min-w-0 space-y-3">
+                  <div class="h-5 bg-slate-200 rounded w-3/4"></div>
+                  <div class="h-3 bg-slate-100 rounded w-full"></div>
+                  <div class="h-3 bg-slate-100 rounded w-2/3"></div>
+                  <div class="flex justify-between items-center pt-2">
+                    <div class="flex gap-2">
+                      <div class="h-5 w-14 bg-[#e1ecf4] rounded"></div>
+                      <div class="h-5 w-16 bg-[#e1ecf4] rounded"></div>
+                    </div>
+                    <div class="h-4 w-28 bg-slate-100 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ========== QUESTIONS LIST ========== -->
+        @if (!isLoading()) {
+          @if (questions().length === 0) {
+            <div class="bg-white border-b border-[#e3e6e8] p-12 text-center animate-in">
+              <svg class="mx-auto h-12 w-12 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p class="text-[#6a737c] font-normal mb-3">No questions found matching your criteria.</p>
+              <a routerLink="/questions/new" class="text-sm text-[#0074cc] hover:text-[#0a95ff] font-medium transition-colors">
+                Be the first to ask a question →
+              </a>
+            </div>
+          } @else {
+            <div class="bg-white animate-in">
+              <app-question-list [questions]="questions()" (tagClick)="onTagClick($event)">
+              </app-question-list>
+            </div>
+
+            <!-- Infinite Scroll Loading -->
+            @if (isLoadingMore()) {
+              <div class="flex justify-center py-6 border-b border-[#e3e6e8] bg-white">
+                <div class="flex items-center gap-3">
+                  <div class="w-5 h-5 border-2 border-[#F48225] border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-sm text-[#6a737c]">Loading more questions...</span>
+                </div>
+              </div>
+            }
+          }
+        }
+      </main>
+
+      <!-- ========== SIDEBAR ========== -->
+      <aside class="w-full lg:w-72 lg:shrink-0">
+        <div class="sticky top-20 space-y-4">
+
+          <!-- "The Overflow Blog" style widget - Simplified -->
+          <div class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+            <div class="bg-slate-50 border-b border-slate-100 px-5 py-3 flex items-center gap-2">
+              <div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+              <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Community Hub</h3>
+            </div>
+            <div class="p-0">
+              <!-- Item 1 -->
+              <div class="border-b border-slate-50 last:border-0 hover:bg-slate-50/30 transition-colors">
+                <a href="#" class="flex p-5 gap-4 items-start">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200 mt-0.5 uppercase shrink-0">Blog</span>
+                  <span class="text-[13px] text-slate-600 hover:text-indigo-600 leading-relaxed transition-colors">
+                    Welcome to UniKnowledge — Your university Q&A community
+                  </span>
+                </a>
+              </div>
+              <!-- Item 2 -->
+              <div class="border-b border-slate-50 last:border-0 hover:bg-slate-50/30 transition-colors">
+                <a href="#" class="flex p-5 gap-4 items-start">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200 mt-0.5 uppercase shrink-0">News</span>
+                  <span class="text-[13px] text-slate-600 hover:text-indigo-600 leading-relaxed transition-colors">
+                    Tips for asking great questions that get answers
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags & Categories -->
+          <app-home-sidebar 
+            [popularTags]="popularTags()" 
+            [categories]="categories()" 
+            (tagClick)="onTagClick($event)"
+            (categoryClick)="onCategoryChange($event)">
+          </app-home-sidebar>
+
+          <!-- "Hot Network Questions" style widget -->
+          <div class="rounded-md border border-[#e3e6e8] overflow-hidden animate-in shadow-sm" style="animation-delay: 0.15s;">
+            <div class="bg-[#f8f9f9] border-b border-[#e3e6e8] px-4 py-2.5 flex items-center justify-between">
+              <h3 class="text-[12px] font-bold text-[#525960] uppercase tracking-wide">Hot Questions</h3>
+            </div>
+
+            <!-- Mini Tabs -->
+            <div class="flex border-b border-[#e3e6e8] bg-white">
+              <button (click)="hotTab = 'views'"
+                class="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors border-b-2"
+                [class.border-[#F48225]]="hotTab === 'views'"
+                [class.text-[#232629]]="hotTab === 'views'"
+                [class.border-transparent]="hotTab !== 'views'"
+                [class.text-[#6a737c]]="hotTab !== 'views'">
+                Most Viewed
+              </button>
+              <button (click)="hotTab = 'votes'"
+                class="flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors border-b-2"
+                [class.border-[#F48225]]="hotTab === 'votes'"
+                [class.text-[#232629]]="hotTab === 'votes'"
+                [class.border-transparent]="hotTab !== 'votes'"
+                [class.text-[#6a737c]]="hotTab !== 'votes'">
+                Top Voted
+              </button>
+            </div>
+
+            <!-- Questions List -->
+            <div class="bg-white">
+              @if (hotTab === 'views') {
+                @for (q of hotQuestions(); track q.questionId) {
+                  <a [routerLink]="['/questions', q.questionId]" 
+                     class="flex flex-col gap-1 py-3 px-4 border-b border-[#f1f2f3] last:border-0 hover:bg-[#f8f9f9] transition-colors group">
+                    <span class="text-[13px] text-[#0074cc] group-hover:text-[#0a95ff] leading-snug font-normal transition-colors line-clamp-2">
+                        {{ q.title }}
+                    </span>
+                    <div class="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <span>{{ q.viewCount }} views</span>
+                    </div>
+                  </a>
+                }
+              }
+              @if (hotTab === 'votes') {
+                @for (q of topVotedQuestions(); track q.questionId) {
+                  <a [routerLink]="['/questions', q.questionId]" 
+                     class="flex flex-col gap-1 py-3 px-4 border-b border-[#f1f2f3] last:border-0 hover:bg-[#f8f9f9] transition-colors group">
+                    <span class="text-[13px] text-[#3b4045] group-hover:text-[#0074cc] leading-snug transition-colors line-clamp-2">
+                      {{ q.title }}
+                    </span>
+                    <div class="flex items-center gap-1 text-[11px] font-bold"
+                        [class.text-emerald-600]="q.voteCount > 0"
+                        [class.text-slate-400]="q.voteCount === 0"
+                        [class.text-red-500]="q.voteCount < 0">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg>
+                        <span>{{ q.voteCount > 0 ? '+' : '' }}{{ q.voteCount }} votes</span>
+                    </div>
+                  </a>
+                }
+              }
+              @if (hotQuestions().length === 0) {
+                <p class="text-[12px] text-[#6a737c] text-center py-8 italic">No questions found</p>
+              }
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
     </div>
   </div>
 </div>

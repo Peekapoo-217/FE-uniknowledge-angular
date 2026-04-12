@@ -18,7 +18,8 @@ export class QuestionService {
     tagId?: number,
     status?: string,
     limit: number = 20,
-    after?: string
+    after?: string,
+    unansweredOnly: boolean = false
   ): Observable<CursorPagedResult<QuestionSummary>> {
     let params = new HttpParams()
       .set('limit', limit.toString());
@@ -28,6 +29,7 @@ export class QuestionService {
     if (tagId) params = params.set('tagId', tagId.toString());
     if (status) params = params.set('status', status);
     if (after) params = params.set('after', after);
+    if (unansweredOnly) params = params.set('unansweredOnly', 'true');
 
     return this.http.get<CursorPagedResult<QuestionSummary>>(this.apiUrl, { params });
   }

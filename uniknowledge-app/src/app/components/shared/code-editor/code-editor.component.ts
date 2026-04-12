@@ -12,9 +12,27 @@ import { AnswerService } from '../../../services/answer.service';
   styleUrls: ['./code-editor.component.scss']
 })
 export class CodeEditorComponent implements OnInit, OnDestroy {
-  @Input() value: string = '';
-  @Input() language: string = 'javascript';
-  @Input() readOnly: boolean = false;
+  private _value: string = '';
+  private _language: string = 'javascript';
+  private _readOnly: boolean = false;
+
+  @Input() 
+  set value(v: string) { this._value = v; }
+  get value(): string { return this._value; }
+
+  @Input() 
+  set language(l: string) {
+    this._language = l || 'javascript';
+    this.updateOptions();
+  }
+  get language(): string { return this._language; }
+
+  @Input() 
+  set readOnly(r: boolean) {
+    this._readOnly = r;
+    this.updateOptions();
+  }
+  get readOnly(): boolean { return this._readOnly; }
   
   // Lazy loading inputs
   @Input() codeId: number | null = null;
@@ -37,7 +55,9 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
     { label: 'JavaScript', value: 'javascript' },
     { label: 'Python', value: 'python' },
     { label: 'SQL', value: 'sql' },
-    { label: 'HTML/CSS', value: 'html' }
+    { label: 'HTML/CSS', value: 'html' },
+    { label: 'Java', value: 'java' },
+    { label: 'TypeScript', value: 'typescript' }
   ];
 
   isDarkTheme = signal<boolean>(true);
@@ -48,19 +68,23 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       const dark = this.isDarkTheme();
-      this.editorOptions = this.buildOptions(dark);
+      // Ensure we track both theme and language changes
+      this.updateOptions();
     });
   }
 
   ngOnInit(): void {
-    this.editorOptions = this.buildOptions(this.isDarkTheme());
+    this.updateOptions();
 
-    // Logic: If no value provided but we have context, and code is "long", set as not loaded
     if (!this.value && this.codeId && this.lineCount >= 20) {
       this.isCodeLoaded.set(false);
     } else {
       this.isCodeLoaded.set(true);
     }
+  }
+
+  private updateOptions(): void {
+    this.editorOptions = this.buildOptions(this.isDarkTheme());
   }
 
   loadCode(): void {
@@ -91,7 +115,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
   private buildOptions(dark: boolean): any {
     return {
       theme: dark ? 'vs-dark' : 'vs',
-      language: this.language || 'javascript',
+      language: this.language,
       readOnly: this.readOnly,
       automaticLayout: true,
       minimap: { enabled: false },
@@ -108,7 +132,6 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
   onEditorInit(editor: any): void {
     this._editorInstance = editor;
-    // Force layout recalculation after mount
     setTimeout(() => {
       editor.layout();
     }, 150);
@@ -120,7 +143,6 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
   onLanguageChange(lang: string): void {
     this.language = lang;
-    this.editorOptions = this.buildOptions(this.isDarkTheme());
     this.languageChange.emit(lang);
   }
 

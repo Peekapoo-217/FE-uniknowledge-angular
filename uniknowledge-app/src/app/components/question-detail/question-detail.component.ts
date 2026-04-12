@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -38,6 +38,12 @@ export class QuestionDetailComponent implements OnInit {
   answers = signal<Answer[]>([]);
   isLoading = signal<boolean>(false);
 
+  // Answer cursor pagination
+  answerPageSize = 5;
+  answerEndCursor = signal<string | undefined>(undefined);
+  answerHasNextPage = signal<boolean>(false);
+  isLoadingMoreAnswers = signal<boolean>(false);
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -60,15 +66,59 @@ export class QuestionDetailComponent implements OnInit {
     });
   }
 
+  @HostListener('window:scroll')
+  onScroll(): void {
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
+    const threshold = 200;
+
+    if (scrollPosition >= documentHeight - threshold && !this.isLoadingMoreAnswers() && this.answerHasNextPage()) {
+      this.loadMoreAnswers();
+    }
+  }
+
   loadAnswers(questionId: number): void {
-    this.answerService.getAnswersByQuestionId(questionId).subscribe({
+    this.answerEndCursor.set(undefined);
+    this.answerService.getAnswersByQuestionId(questionId, this.answerPageSize).subscribe({
       next: (result) => {
         this.answers.set(result.items);
+        this.answerEndCursor.set(result.pageInfo.endCursor ?? undefined);
+        this.answerHasNextPage.set(result.pageInfo.hasNextPage);
+        this.checkAndFillAnswers();
       },
       error: (err) => {
         console.error('Error loading answers:', err);
       }
     });
+  }
+
+  loadMoreAnswers(): void {
+    const question = this.question();
+    if (!question || !this.answerHasNextPage() || this.isLoadingMoreAnswers()) return;
+    this.isLoadingMoreAnswers.set(true);
+    this.answerService.getAnswersByQuestionId(question.questionId, this.answerPageSize, this.answerEndCursor()).subscribe({
+      next: (result) => {
+        this.answers.update(current => [...current, ...result.items]);
+        this.answerEndCursor.set(result.pageInfo.endCursor ?? undefined);
+        this.answerHasNextPage.set(result.pageInfo.hasNextPage);
+        this.isLoadingMoreAnswers.set(false);
+        this.checkAndFillAnswers();
+      },
+      error: (err) => {
+        console.error('Error loading more answers:', err);
+        this.isLoadingMoreAnswers.set(false);
+      }
+    });
+  }
+
+  private checkAndFillAnswers(): void {
+    setTimeout(() => {
+      const documentHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      if (documentHeight <= viewportHeight && this.answerHasNextPage() && !this.isLoadingMoreAnswers()) {
+        this.loadMoreAnswers();
+      }
+    }, 100);
   }
 
   voteQuestion(voteType: 'upvote' | 'downvote'): void {
