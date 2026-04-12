@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { TagDetail } from '../../../models/tag.model';
 import { Category } from '../../../models/category.model';
 import { PopularTagsComponent } from '../popular-tags/popular-tags.component';
-import { CategoriesListComponent } from '../categories-list/categories-list.component';
 
 @Component({
     selector: 'app-home-sidebar',
     standalone: true,
-    imports: [CommonModule, PopularTagsComponent, CategoriesListComponent],
+    imports: [CommonModule, PopularTagsComponent],
     templateUrl: './home-sidebar.component.html',
     styleUrls: ['./home-sidebar.component.scss']
 })

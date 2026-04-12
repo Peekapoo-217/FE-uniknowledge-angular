@@ -1,124 +1,143 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Create your account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Or
-        <a routerLink="/login" class="font-medium text-primary-600 hover:text-primary-500">
-          sign in to existing account
-        </a>
-      </p>
+<div class="min-h-screen flex flex-col items-center justify-center bg-slate-100/50 py-12 px-4 sm:px-6 lg:px-8">
+  <!-- Brand / Logo Area -->
+  <div class="mb-10 text-center animate-in">
+    <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-md border border-slate-200 mb-5">
+      <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
     </div>
+    <h2 class="text-3xl font-medium text-slate-900">Create your account</h2>
+    <p class="mt-2 text-slate-600 font-normal">Join the community and start sharing knowledge</p>
+  </div>
 
-    <form class="mt-8 space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      @if (errorMessage()) {
-        <div class="rounded-md bg-red-50 p-4">
-          <div class="flex">
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">
-                {{ errorMessage() }}
-              </h3>
+  <div class="max-w-md w-full animate-in" style="animation-delay: 0.15s;">
+    <div class="bg-white rounded-2xl shadow-2xl shadow-slate-300/60 p-10 border border-slate-200">
+      <form class="space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        
+        @if (errorMessage()) {
+          <div class="rounded-xl bg-red-50 border border-red-200 p-4 animate-in">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-red-900">{{ errorMessage() }}</p>
+              </div>
             </div>
           </div>
-        </div>
-      }
+        }
 
-      <div class="rounded-md shadow-sm space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            formControlName="username"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-            placeholder="Username"
-          />
-          @if (username?.invalid && username?.touched) {
-            <div class="text-red-600 text-xs mt-1">
-              @if (username?.errors?.['required']) {
-                Username is required
-              }
-              @if (username?.errors?.['minlength']) {
-                Username must be at least 3 characters
-              }
-            </div>
-          }
+        <div class="space-y-5">
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-sm font-semibold text-slate-800 mb-2">Username</label>
+            <input
+              id="username"
+              type="text"
+              formControlName="username"
+              class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-600 transition-all font-normal placeholder:text-slate-400"
+              placeholder="johndoe"
+            />
+            @if (username?.invalid && username?.touched) {
+              <div class="text-red-500 text-[13px] mt-1.5 font-normal italic">
+                @if (username?.errors?.['required']) { Username is required }
+                @if (username?.errors?.['minlength']) { At least 3 characters required }
+              </div>
+            }
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-semibold text-slate-800 mb-2">Email address</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-600 transition-all font-normal placeholder:text-slate-400"
+              placeholder="name@company.com"
+            />
+            @if (email?.invalid && email?.touched) {
+              <div class="text-red-500 text-[13px] mt-1.5 font-normal italic">
+                @if (email?.errors?.['required']) { Email is required }
+                @if (email?.errors?.['email']) { Please enter a valid email address }
+              </div>
+            }
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-semibold text-slate-800 mb-2">Password</label>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-600 transition-all font-normal placeholder:text-slate-400"
+              placeholder="••••••••"
+            />
+            @if (password?.invalid && password?.touched) {
+              <div class="text-red-500 text-[13px] mt-1.5 font-normal italic">
+                @if (password?.errors?.['required']) { Password is required }
+                @if (password?.errors?.['minlength']) { At least 6 characters required }
+              </div>
+            }
+          </div>
+
+          <!-- Full Name -->
+          <div>
+            <label for="fullName" class="block text-sm font-semibold text-slate-800 mb-2">Full Name (Optional)</label>
+            <input
+              id="fullName"
+              type="text"
+              formControlName="fullName"
+              class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-600 transition-all font-normal placeholder:text-slate-400"
+              placeholder="John Doe"
+            />
+          </div>
         </div>
 
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            formControlName="email"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-            placeholder="Email address"
-          />
-          @if (email?.invalid && email?.touched) {
-            <div class="text-red-600 text-xs mt-1">
-              @if (email?.errors?.['required']) {
-                Email is required
-              }
-              @if (email?.errors?.['email']) {
-                Invalid email format
-              }
-            </div>
-          }
-        </div>
-
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            formControlName="password"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-            placeholder="Password"
-          />
-          @if (password?.invalid && password?.touched) {
-            <div class="text-red-600 text-xs mt-1">
-              @if (password?.errors?.['required']) {
-                Password is required
-              }
-              @if (password?.errors?.['minlength']) {
-                Password must be at least 6 characters
-              }
-            </div>
-          }
-        </div>
-
-        <div>
-          <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name (Optional)</label>
-          <input
-            id="fullName"
-            name="fullName"
-            type="text"
-            formControlName="fullName"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-            placeholder="Full Name"
-          />
-        </div>
-      </div>
-
-      <div>
         <button
           type="submit"
           [disabled]="isLoading()"
-          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex justify-center py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.97]"
         >
           @if (isLoading()) {
-            <span>Creating account...</span>
+            <span class="flex items-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating account...
+            </span>
           } @else {
             <span>Create account</span>
           }
         </button>
-      </div>
-    </form>
+
+        <div class="relative py-4">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-slate-200"></div>
+          </div>
+          <div class="relative flex justify-center text-xs uppercase">
+            <span class="bg-white px-3 text-slate-500 font-semibold tracking-wider">Already have an account?</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          routerLink="/login"
+          class="w-full flex justify-center py-3.5 px-4 bg-white border-2 border-slate-100 text-slate-800 text-sm font-bold rounded-xl hover:bg-slate-50 hover:border-slate-200 transition-all focus:outline-none transform active:scale-[0.97] shadow-sm"
+        >
+          Sign in instead
+        </button>
+      </form>
+    </div>
   </div>
+
+
+  <p class="mt-8 text-center text-xs text-slate-400 font-light max-w-sm">
+    By creating an account, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>.
+  </p>
 </div>
 

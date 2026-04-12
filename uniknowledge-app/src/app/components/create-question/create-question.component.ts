@@ -41,6 +41,7 @@ export class CreateQuestionComponent implements OnInit {
   tagSearchQuery = signal<string>('');
   suggestedTags = signal<TagDetail[]>([]);
   isSearchingTags = signal<boolean>(false);
+  showCodeEditor = signal<boolean>(false);
 
   constructor() {
     this.questionForm = this.fb.group({
@@ -228,4 +229,3 @@ export class CreateQuestionComponent implements OnInit {
     return this.questionForm.get('categoryId');
   }
 }
-

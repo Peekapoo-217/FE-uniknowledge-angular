@@ -1,7 +1,7 @@
-<div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
-    <div class="flex gap-4">
+<div class="clean-card p-6 animate-in group">
+    <div class="flex gap-6 w-full">
         <app-question-stats [question]="question()"></app-question-stats>
-        <app-question-content [question]="question()" (tagClick)="onTagClick($event)">
+        <app-question-content class="flex-1 min-w-0" [question]="question()" (tagClick)="onTagClick($event)">
         </app-question-content>
     </div>
 </div>

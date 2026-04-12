@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { QuestionService } from '../../services/question.service';
 import { CategoryService } from '../../services/category.service';
 import { TagService } from '../../services/tag.service';
@@ -14,7 +14,7 @@ import { HomeSidebarComponent } from '../shared/home-sidebar/home-sidebar.compon
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuestionListComponent, HomeSidebarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, QuestionListComponent, HomeSidebarComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -34,6 +34,15 @@ export class HomeComponent implements OnInit {
   searchTerm = '';
   selectedCategoryId?: number;
   selectedTagIds = signal<number[]>([]);
+  currentSort: 'newest' | 'unanswered' = 'newest';
+  private allQuestions = signal<QuestionSummary[]>([]);
+  hotTab: 'views' | 'votes' = 'views';
+  hotQuestions = computed(() =>
+    [...this.allQuestions()].sort((a, b) => b.viewCount - a.viewCount).slice(0, 5)
+  );
+  topVotedQuestions = computed(() =>
+    [...this.allQuestions()].sort((a, b) => b.voteCount - a.voteCount).slice(0, 5)
+  );
 
   // Cursor pagination
   endCursor = signal<string | undefined>(undefined);
@@ -84,13 +93,17 @@ export class HomeComponent implements OnInit {
       this.selectedCategoryId,
       undefined,
       undefined,
-      this.pageSize
+      this.pageSize,
+      undefined,
+      this.currentSort === 'unanswered'
     ).subscribe({
       next: (result) => {
-        this.questions.set(result.items);
+        this.allQuestions.set(result.items);
+        this.applySort();
         this.endCursor.set(result.pageInfo.endCursor ?? undefined);
         this.hasNextPage.set(result.pageInfo.hasNextPage);
         this.isLoading.set(false);
+        this.checkAndFillPage();
       },
       error: (err) => {
         console.error('Error loading questions:', err);
@@ -108,19 +121,37 @@ export class HomeComponent implements OnInit {
       undefined,
       undefined,
       this.pageSize,
-      this.endCursor()
+      this.endCursor(),
+      this.currentSort === 'unanswered'
     ).subscribe({
       next: (result) => {
-        this.questions.update(current => [...current, ...result.items]);
+        this.allQuestions.update(current => [...current, ...result.items]);
+        this.applySort();
         this.endCursor.set(result.pageInfo.endCursor ?? undefined);
         this.hasNextPage.set(result.pageInfo.hasNextPage);
         this.isLoadingMore.set(false);
+        this.checkAndFillPage();
       },
       error: (err) => {
         console.error('Error loading more questions:', err);
         this.isLoadingMore.set(false);
       }
     });
+  }
+
+  /**
+   * After loading, check if the page content is shorter than the viewport.
+   * If so and there are more pages, auto-load the next batch so a scrollbar appears.
+   * Once the scrollbar exists, normal infinite scroll takes over.
+   */
+  private checkAndFillPage(): void {
+    setTimeout(() => {
+      const documentHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      if (documentHeight <= viewportHeight && this.hasNextPage() && !this.isLoadingMore()) {
+        this.loadMoreQuestions();
+      }
+    }, 100);
   }
 
   loadCategories(): void {
@@ -187,7 +218,8 @@ export class HomeComponent implements OnInit {
       limit: 20
     }).subscribe({
       next: (response) => {
-        this.questions.set(response.items);
+        this.allQuestions.set(response.items);
+        this.applySort();
         this.tagFilterEndCursor.set(response.pageInfo.endCursor ?? undefined);
         this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
         this.isLoading.set(false);
@@ -209,7 +241,8 @@ export class HomeComponent implements OnInit {
       after: this.tagFilterEndCursor()
     }).subscribe({
       next: (response) => {
-        this.questions.update(current => [...current, ...response.items]);
+        this.allQuestions.update(current => [...current, ...response.items]);
+        this.applySort();
         this.tagFilterEndCursor.set(response.pageInfo.endCursor ?? undefined);
         this.tagFilterHasNextPage.set(response.pageInfo.hasNextPage);
         this.isLoadingMore.set(false);
@@ -229,4 +262,15 @@ export class HomeComponent implements OnInit {
   }
 
 
+  onSortChange(sort: 'newest' | 'unanswered'): void {
+    if (this.currentSort === sort) return;
+    this.currentSort = sort;
+    this.loadQuestions(); // Reload from server with new filter
+  }
+
+  private applySort(): void {
+    // We now mostly rely on server-side sorting/filtering.
+    // However, we still sync the main questions signal with allQuestions.
+    this.questions.set(this.allQuestions());
+  }
 }
