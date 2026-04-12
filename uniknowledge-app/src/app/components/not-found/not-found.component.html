@@ -1,39 +1,44 @@
-<div class="not-found-container">
-    <mat-card class="not-found-card">
-        <mat-card-content>
-            <!-- Error Message -->
-            <h1 class="error-code">404</h1>
-            <h2 class="error-title">Trang không tồn tại</h2>
-            <p class="error-description">
-                Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.
-                URL có thể đã bị thay đổi hoặc không còn tồn tại.
-            </p>
+<div class="not-found-wrapper">
+  <div class="glass-container animate-fade-in">
+    <div class="error-visual">
+      <h1 class="glitch-text" data-text="404">404</h1>
+      <div class="decorative-blob"></div>
+    </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a mat-raised-button color="primary" routerLink="/">
-                    Về trang chủ
-                </a>
+    <div class="content-section">
+      <h2 class="title">Úi! Trang này không tồn tại</h2>
+      <p class="description">
+        Có vẻ như bạn đã đi lạc vào một vùng kiến thức chưa được khám phá. 
+        Đừng lo, chúng tôi sẽ giúp bạn quay lại đúng hướng!
+      </p>
 
-                @if (!authService.isAuthenticated()) {
-                <a mat-raised-button routerLink="/login">
-                    Đăng nhập
-                </a>
-                }
-            </div>
+      <div class="primary-actions">
+        <a mat-flat-button color="primary" routerLink="/" class="home-btn">
+          <mat-icon>home</mat-icon>
+          Về trang chủ
+        </a>
+        
+        @if (!authService.isAuthenticated()) {
+          <a mat-stroked-button routerLink="/login" class="login-btn">
+            Đăng nhập
+          </a>
+        }
+      </div>
 
-            <!-- Additional Help -->
-            <div class="additional-help">
-                <p class="help-text">Hoặc bạn có thể:</p>
-                <div class="help-links">
-                    <a mat-button routerLink="/tags">
-                        Xem các tags phổ biến
-                    </a>
-                    <a mat-button routerLink="/categories">
-                        Duyệt qua các danh mục
-                    </a>
-                </div>
-            </div>
-        </mat-card-content>
-    </mat-card>
+      <div class="divider">
+        <span>Hoặc khám phá</span>
+      </div>
+
+      <div class="quick-links">
+        <a mat-button routerLink="/tags" class="link-item">
+          <mat-icon>local_offer</mat-icon>
+          Tags phổ biến
+        </a>
+        <a mat-button routerLink="/categories" class="link-item">
+          <mat-icon>category</mat-icon>
+          Danh mục
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

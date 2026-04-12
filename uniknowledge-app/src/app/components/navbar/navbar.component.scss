@@ -1,2 +1,45 @@
 // Navbar component styles
+:host {
+  display: block;
+}
+
+nav {
+  // Smooth height transition for mobile menu
+  .lg\:hidden {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+  }
+}
+
+// Search bar focus effect
+.focus-within\:ring-2 {
+  transition: all 0.2s ease;
+  &:focus-within {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Admin dropdown animation
+.admin-dropdown {
+  animation: dropdownFadeIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Active link enhancement
+.router-link-active {
+  color: var(--primary-600) !important;
+  font-weight: 600;
+}
 

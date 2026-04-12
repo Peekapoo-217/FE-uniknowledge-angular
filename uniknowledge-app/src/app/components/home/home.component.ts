@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { QuestionService } from '../../services/question.service';
 import { CategoryService } from '../../services/category.service';
 import { TagService } from '../../services/tag.service';
@@ -21,6 +22,8 @@ export class HomeComponent implements OnInit {
   private questionService = inject(QuestionService);
   private categoryService = inject(CategoryService);
   private tagService = inject(TagService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   questions = signal<QuestionSummary[]>([]);
   categories = signal<Category[]>([]);
@@ -42,7 +45,13 @@ export class HomeComponent implements OnInit {
   tagFilterHasNextPage = signal<boolean>(false);
 
   ngOnInit(): void {
-    this.loadQuestions();
+    // Listen for search query parameter
+    this.route.queryParamMap.subscribe(params => {
+      const q = params.get('q');
+      this.searchTerm = q || '';
+      this.loadQuestions();
+    });
+
     this.loadCategories();
     this.loadPopularTags();
   }
@@ -137,7 +146,11 @@ export class HomeComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.loadQuestions();
+    if (this.searchTerm.trim()) {
+      this.router.navigate(['/search'], { queryParams: { q: this.searchTerm } });
+    } else {
+      this.loadQuestions();
+    }
   }
 
   onCategoryChange(categoryId: string): void {
