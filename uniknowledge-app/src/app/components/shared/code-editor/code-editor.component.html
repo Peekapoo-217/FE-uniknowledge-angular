@@ -1,114 +1,122 @@
 <!-- src/app/components/shared/code-editor/code-editor.component.html -->
-<div class="code-editor-container"
-     [style.border]="isDarkTheme() ? '1px solid #374151' : '1px solid #d1d5db'"
-     [style.background]="isDarkTheme() ? '#111827' : '#ffffff'">
+<div class="code-editor-container" [style.border]="isDarkTheme() ? '1px solid #374151' : '1px solid #d1d5db'"
+  [style.background]="isDarkTheme() ? '#111827' : '#ffffff'">
 
   <!-- Toolbar -->
-  <div class="editor-toolbar"
-       [style.background]="isDarkTheme() ? '#1f2937' : '#f3f4f6'"
-       [style.borderBottom]="isDarkTheme() ? '1px solid #374151' : '1px solid #e5e7eb'">
+  <div class="editor-toolbar" [style.background]="isDarkTheme() ? '#1f2937' : '#f3f4f6'"
+    [style.borderBottom]="isDarkTheme() ? '1px solid #374151' : '1px solid #e5e7eb'">
 
     <div style="display:flex; align-items:center; gap:0.75rem;">
-      <!-- Language Selector (edit mode) -->
-      @if (!readOnly) {
-        <select
-          class="lang-select"
-          title="Select Programming Language"
-          [class.lang-select--dark]="isDarkTheme()"
-          [class.lang-select--light]="!isDarkTheme()"
-          [(ngModel)]="language"
-          (ngModelChange)="onLanguageChange($event)">
-          @for (lang of languages; track lang.value) {
-            <option [value]="lang.value">{{ lang.label }}</option>
-          }
-        </select>
+      <!-- Language Selector (Always interactive, even if read-only) -->
+      <select class="lang-select" title="Select Programming Language" [class.lang-select--dark]="isDarkTheme()"
+        [class.lang-select--light]="!isDarkTheme()" [(ngModel)]="_language" (ngModelChange)="onLanguageChange($event)">
+        @for (lang of languages; track lang.value) {
+        <option [value]="lang.value">{{ lang.label }}</option>
+        }
+      </select>
 
-        <button class="btn-action btn-format" (click)="formatCode()" title="Format Code">
-          <i class="fas fa-align-left"></i>
-          <span>Format</span>
-        </button>
-
-        <button class="btn-action btn-run" (click)="runCode()" title="Run Code">
-          <i class="fas fa-play"></i>
-          <span>Run</span>
-        </button>
+      <!-- Format Code (only in edit mode) -->
+      @if (isEditable) {
+      <button class="btn-action btn-format" (click)="formatCode()" title="Format Code">
+        <i class="fas fa-align-left"></i>
+        <span>Format</span>
+      </button>
       }
 
-      <!-- Language Badge + Run (read-only mode) -->
-      @if (readOnly) {
-        <span class="lang-badge">{{ language }}</span>
+      <!-- Run Code (Always active) -->
+      <button class="btn-action btn-run" (click)="runCode()" title="Run Code">
+        <i class="fas fa-play"></i>
+        <span>Run</span>
+      </button>
 
-        <button class="btn-action btn-run" (click)="runCode()" title="Run Code">
-          <i class="fas fa-play"></i>
-          <span>Run</span>
-        </button>
+      <!-- Live Collaboration Controls -->
+      @if (!isCollabActive()) {
+      <button class="btn-action btn-collab-start" (click)="connectCollab()" title="Start Real-time Collaboration">
+        <i class="fas fa-satellite-dish"></i>
+        <span>Live Collab</span>
+      </button>
+      } @else {
+      <button class="btn-action btn-collab-stop" (click)="disconnectCollab()"
+        title="Disconnect Real-time Collaboration">
+        <i class="fas fa-power-off"></i>
+        <span>Disconnect Collab</span>
+      </button>
+
+      <!-- Avatar Stack of active online users -->
+      <div class="collab-avatar-stack" title="Active Collaborators">
+        @for (user of onlineUsers(); track user.connectionId) {
+        <div class="collab-avatar-wrapper" [title]="user.fullName || user.username">
+          @if (user.avatarUrl) {
+          <img [src]="user.avatarUrl" [alt]="user.username" class="collab-avatar-img" />
+          } @else {
+          <div class="collab-avatar-placeholder" [class]="'avatar-color-' + (user.userId % 5)">
+            {{ (user.fullName || user.username).substring(0, 1).toUpperCase() }}
+          </div>
+          }
+        </div>
+        }
+      </div>
       }
     </div>
 
     <!-- Theme Toggle -->
-    <button class="btn-action btn-theme"
-            (click)="toggleTheme()"
-            [title]="isDarkTheme() ? 'Light Theme' : 'Dark Theme'">
+    <button class="btn-action btn-theme" (click)="toggleTheme()" [title]="isDarkTheme() ? 'Light Theme' : 'Dark Theme'">
       @if (isDarkTheme()) {
-        <i class="fas fa-sun" style="color:#fbbf24; font-size:1rem;"></i>
+      <i class="fas fa-sun" style="color:#fbbf24; font-size:1rem;"></i>
       } @else {
-        <i class="fas fa-moon" style="color:#2563eb; font-size:1rem;"></i>
+      <i class="fas fa-moon" style="color:#2563eb; font-size:1rem;"></i>
       }
     </button>
   </div>
 
   <!-- Monaco Editor -->
-  <div class="editor-wrapper" [class.editor-wrapper--readonly]="readOnly">
+  <div class="editor-wrapper" [class.editor-wrapper--readonly]="!isEditable">
     @if (!isCodeLoaded()) {
-      <div class="code-overlay">
-        <div class="overlay-content">
-          <i class="fas fa-code-branch code-icon"></i>
-          <p>Large code snippet ({{ lineCount }} lines)</p>
-          <button class="btn-show-code" (click)="$event.stopPropagation(); loadCode()" [disabled]="isFetching()">
-            @if (isFetching()) {
-              <i class="fas fa-spinner fa-spin"></i>
-              <span>Loading...</span>
-            } @else {
-              <i class="fas fa-eye"></i>
-              <span>Show Code</span>
-            }
-          </button>
-        </div>
+    <div class="code-overlay">
+      <div class="overlay-content">
+        <i class="fas fa-code-branch code-icon"></i>
+        <p>Large code snippet ({{ lineCount }} lines)</p>
+        <button class="btn-show-code" (click)="$event.stopPropagation(); loadCode()" [disabled]="isFetching()">
+          @if (isFetching()) {
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Loading...</span>
+          } @else {
+          <i class="fas fa-eye"></i>
+          <span>Show Code</span>
+          }
+        </button>
       </div>
+    </div>
     }
-    <ngx-monaco-editor
-      [options]="editorOptions"
-      [(ngModel)]="value"
-      (onInit)="onEditorInit($event)"
+    <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="value" (onInit)="onEditorInit($event)"
       (ngModelChange)="onCodeChange($event)">
     </ngx-monaco-editor>
   </div>
 
   <!-- Console Output -->
   @if (isConsoleVisible()) {
-    <div class="console-area">
-      <div class="console-header">
-        <div class="console-header-title">
-          <i class="fas fa-terminal"></i>
-          <span>Console Output</span>
-        </div>
-        <button class="console-close" (click)="clearConsole()" title="Close">
-          <i class="fas fa-times"></i>
-        </button>
+  <div class="console-area">
+    <div class="console-header">
+      <div class="console-header-title">
+        <i class="fas fa-terminal"></i>
+        <span>Console Output</span>
       </div>
-      <div class="console-body">
-        @for (log of consoleOutput(); track $index) {
-          <div class="console-line"
-               [class.console-line--error]="log.startsWith('Error:')"
-               [class.console-line--meta]="log.startsWith('>')"
-               [class.console-line--info]="!log.startsWith('Error:') && !log.startsWith('>')">
-            {{ log }}
-          </div>
-        }
-        @if (consoleOutput().length === 0) {
-          <div class="console-line console-line--empty">No output</div>
-        }
-      </div>
+      <button class="console-close" (click)="clearConsole()" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
+    <div class="console-body">
+      @for (log of consoleOutput(); track $index) {
+      <div class="console-line" [class.console-line--error]="log.startsWith('Error:')"
+        [class.console-line--meta]="log.startsWith('>')"
+        [class.console-line--info]="!log.startsWith('Error:') && !log.startsWith('>')">
+        {{ log }}
+      </div>
+      }
+      @if (consoleOutput().length === 0) {
+      <div class="console-line console-line--empty">No output</div>
+      }
+    </div>
+  </div>
   }
 </div>

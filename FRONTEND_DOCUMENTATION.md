@@ -239,6 +239,28 @@ providers: [
 
 ---
 
+### CollaborativeCodeService (`collaborative-code.service.ts`)
+**Hub URL:** `http://localhost:5134/hubs/code`
+*Được cung cấp ở phạm vi Component (`providers: [CollaborativeCodeService]`) để cô lập hoàn toàn vòng đời kết nối SignalR trên từng trình soạn thảo riêng biệt.*
+
+| Method | Mô tả |
+|--------|-------|
+| `connect(roomId)` | Khởi tạo kết nối SignalR bảo mật bằng JWT và gửi yêu cầu JoinRoom vào phòng cộng tác. |
+| `disconnect(roomId)` | Gửi yêu cầu LeaveRoom, dừng HubConnection và dọn dẹp bộ nhớ kết nối. |
+| `sendCodeDelta(roomId, deltas)` | Phát các thay đổi phím bấm cục bộ (`IModelContentChange[]`) tới toàn bộ thành viên khác. |
+| `sendCursor(roomId, cursor)` | Phát tọa độ con trỏ chuột cục bộ của người dùng (được lọc nghẽn 150ms tại component). |
+| `isConnected()` | Trả về trạng thái kết nối websocket hiện tại. |
+
+**RxJS Subjects (Streams):**
+
+| Observable | Sự kiện lắng nghe | Kiểu dữ liệu |
+|------------|-----------------|--------------|
+| `codeDeltaReceived$` | `ReceiveCodeDelta` | `any[]` (Mảng thay đổi delta từ cộng tác viên khác) |
+| `userPresenceChanged$` | `UserPresenceChanged` | `UserPresence[]` (Danh sách avatar cộng tác viên trực tuyến) |
+| `remoteCursorMoved$` | `ReceiveCursorMoved` | `RemoteCursor` (Tọa độ và định danh người dùng di chuyển chuột) |
+
+---
+
 ### QuestionService (`question.service.ts`)
 **API Base:** `http://localhost:5134/api/questions`
 
@@ -418,11 +440,16 @@ export interface Question extends Omit<QuestionSummary, 'content' | 'user' | 'ca
 }
 ```
 
-### Lazy Loading Logic (Code Editor)
-Để tránh "nghẽn" trình duyệt khi xử lý code lớn:
+### Lazy Loading & Collaboration Logic (Code Editor)
+Để tối ưu hóa trải nghiệm và hiệu năng xử lý mã nguồn:
 1. **Auto-load**: Nếu `codeLineCount < 20`, `codeContent` được tải sẵn.
 2. **On-demand**: Nếu `codeLineCount >= 20`, người dùng phải nhấn nút "Show Code" để tải code từ API `/code`.
 3. **Conditional Rendering**: Editor chỉ hiển thị nếu `codeLanguage` được khai báo.
+4. **Tự do chọn ngôn ngữ & Chạy thử**: Bảng chọn ngôn ngữ và nút **Run** luôn hiển thị và hoạt động đầy đủ trên mọi trình soạn thảo (kể cả bài đăng đã đóng dạng Read-only). Thay đổi ngôn ngữ sẽ lập tức cập nhật Monaco syntax highlighter cục bộ tương ứng ngay tức thì mà không cần kích hoạt "Live Collab".
+5. **Live Collaboration (Cộng tác thời gian thực)**:
+   - Khi nhấn **Live Collab**, trình soạn thảo kết nối tới SignalR Hub và chuyển sang trạng thái tương tác hoàn chỉnh (`readOnly: false` cục bộ).
+   - **Chống lặp phím bấm (Anti-Echo)**: Sử dụng try...finally bao bọc chặt chẽ trạng thái thay đổi giúp cô lập thao tác gõ chữ mạng với thao tác bàn phím cục bộ.
+   - **Lọc nghẽn tọa độ chuột**: Tọa độ con trỏ chuột của người dùng được lọc nghẽn (`throttleTime(150)`) trước khi gửi lên WebSocket nhằm bảo vệ băng thông và tài nguyên máy khách.
 
 
 ### Message
@@ -496,7 +523,7 @@ interface TypingIndicator { userId: number; username?: string; }
 |-----------|-------|
 | **NavbarComponent** | Thanh điều hướng: logo, menu, user avatar, unread badge, admin menu |
 | **ConfirmationDialogComponent** | Dialog xác nhận hành động (Material Dialog) |
-| **CodeEditorComponent** | Editor đa ngôn ngữ (Monaco), hỗ trợ Format & Run (JS) |
+| **CodeEditorComponent** | Trình soạn thảo đa ngôn ngữ (Monaco Editor). Hỗ trợ Định dạng (Format) khi soạn thảo, Chạy thử (Run) mã nguồn (JS chạy trực tiếp client-side; các ngôn ngữ khác chạy giả lập). Tích hợp tính năng **Cộng tác thời gian thực (Live Collab)** đồng bộ phím bấm (keystroke deltas) và vị trí con trỏ chuột của nhiều người dùng cùng lúc. |
 | **TimeAgoPipe** | Chuyển đổi Date thành chuỗi tương đối (vd: "3 hours ago") |
 | **SharedComponents** | Components tái sử dụng chung |
 

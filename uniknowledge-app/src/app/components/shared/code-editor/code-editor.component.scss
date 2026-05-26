@@ -273,3 +273,95 @@
     font-style: italic;
   }
 }
+
+/* Real-time Collaboration Styling */
+.btn-collab-start {
+  background-color: #2563eb !important;
+  &:hover { background-color: #1d4ed8 !important; }
+}
+
+.btn-collab-stop {
+  background-color: #dc2626 !important;
+  &:hover { background-color: #b91c1c !important; }
+}
+
+/* Avatar Stack Layout */
+.collab-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  direction: rtl; /* overlap avatars from right to left */
+}
+
+.collab-avatar-wrapper {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #1f2937;
+  overflow: hidden;
+  margin-left: -8px; /* negative margin overlap */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  background-color: #374151;
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.15);
+    z-index: 10 !important;
+    margin-left: -4px;
+    margin-right: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.collab-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collab-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+
+  &.avatar-color-0 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  &.avatar-color-1 { background: linear-gradient(135deg, #10b981, #047857); }
+  &.avatar-color-2 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  &.avatar-color-3 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+  &.avatar-color-4 { background: linear-gradient(135deg, #ec4899, #be185d); }
+}
+
+/* Remote cursors & selection styles injected dynamically into Monaco */
+::ng-deep {
+  .remote-cursor-line {
+    border-left: 2px solid #3b82f6;
+    margin-left: -1px;
+    position: relative;
+    animation: remote-cursor-pulse 1s infinite alternate;
+  }
+
+  .remote-cursor-user-blue { border-left-color: #3b82f6 !important; }
+  .remote-cursor-user-green { border-left-color: #10b981 !important; }
+  .remote-cursor-user-pink { border-left-color: #ec4899 !important; }
+  .remote-cursor-user-amber { border-left-color: #f59e0b !important; }
+  .remote-cursor-user-purple { border-left-color: #8b5cf6 !important; }
+  .remote-cursor-user-emerald { border-left-color: #059669 !important; }
+
+  @keyframes remote-cursor-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+}
+
